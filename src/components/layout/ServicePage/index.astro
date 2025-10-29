@@ -1,0 +1,28 @@
+---
+/**
+ * ServicePage — thin wrapper around BaseLayout
+ * Use when a page wants a semantic “service layout” without custom sections.
+ * Props:
+ *  - title?: string
+ *  - description?: string
+ *  - seo?: Record<string, any>
+ */
+
+import BaseLayout from "../BaseLayout.astro"
+
+export interface Props {
+  title?: string
+  description?: string
+  seo?: Record<string, any>
+}
+
+const {
+  title = "",
+  description = "",
+  seo = {}
+} = Astro.props as Props
+---
+
+<BaseLayout {title} {description} {seo}>
+  <slot />
+</BaseLayout>

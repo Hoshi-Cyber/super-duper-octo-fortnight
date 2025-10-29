@@ -1,0 +1,63 @@
+---
+// src/components/blog/CategoryGrid/index.astro
+/**
+ * CategoryGrid — 4 category cards, responsive, a11y-first.
+ * Props:
+ *  - eyebrow?: string
+ *  - title?: string
+ *  - items: Array<{ icon?: string; title: string; blurb: string; href: string }>
+ */
+
+export interface Item { icon?: string; title: string; blurb: string; href: string }
+export interface Props {
+  eyebrow?: string;
+  title?: string;
+  items: Item[];
+}
+
+const {
+  eyebrow = "Explore topics",
+  title = "Featured categories",
+  items = [],
+} = Astro.props as Props;
+
+import css from "./CategoryGrid.css?url";
+---
+
+<style is:global>
+  @import "../../../styles/tokens.css";
+  @import "../../../styles/typography.css";
+  @import "../../../styles/utilities.css";
+  @import "../../../styles/breakpoints.css";
+</style>
+<link rel="stylesheet" href={css} />
+
+<section class="catgrid" aria-label="Featured categories">
+  <div class="container">
+    <header class="catgrid__head">
+      {eyebrow && <p class="catgrid__eyebrow">{eyebrow}</p>}
+      {title && <h2 class="catgrid__title">{title}</h2>}
+    </header>
+
+    <div class="catgrid__grid">
+      {items.slice(0, 4).map((c) => (
+        <a
+          href={c.href}
+          class="catgrid__card"
+          data-cta="category-card"
+          aria-label={`Open ${c.title} category`}
+        >
+          <div class="catgrid__icon" aria-hidden="true">
+            {c.icon?.endsWith?.(".svg") || c.icon?.startsWith?.("/")
+              ? <img src={c.icon} alt="" loading="lazy" decoding="async" fetchpriority="low" />
+              : <span>{c.icon ?? "📚"}</span>}
+          </div>
+          <div class="catgrid__body">
+            <h3 class="catgrid__cardTitle">{c.title}</h3>
+            <p class="catgrid__blurb">{c.blurb}</p>
+          </div>
+        </a>
+      ))}
+    </div>
+  </div>
+</section>

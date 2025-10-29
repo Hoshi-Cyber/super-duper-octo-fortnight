@@ -1,0 +1,32 @@
+---
+export interface Crumb { name: string; href: string }
+export interface Props { items: Crumb[] }
+const { items = [] } = Astro.props
+import './Breadcrumbs.css'
+
+const lastIndex = items.length - 1
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: items.map((c, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: c.name,
+    item: new URL(c.href, Astro.site || 'https://example.com').toString()
+  }))
+}
+---
+<nav class="breadcrumbs" aria-label="Breadcrumb">
+  <ol>
+    {items.map((c, i) => (
+      <li>
+        {i < lastIndex
+          ? <a href={c.href} data-cta={`breadcrumb:${c.name}`}>{c.name}</a>
+          : <span aria-current="page">{c.name}</span>}
+      </li>
+    ))}
+  </ol>
+</nav>
+<script type="application/ld+json">
+  {JSON.stringify(jsonLd)}
+</script>

@@ -1,0 +1,100 @@
+/* Mobile-first. Uses shared tokens and container rhythm. */
+
+.pagination {
+  padding-block: var(--space-8);
+  background: var(--color-background);
+  border-top: 1px solid var(--color-light);
+}
+
+.pagination__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+  justify-content: center;
+}
+
+.pagination__item { display: inline-flex; }
+
+/* Controls: Prev/Next */
+.pagination__control {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--fs-base);
+  font-weight: 600;
+  color: var(--color-primary);
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-light);
+  background: var(--color-background);
+  box-shadow: var(--shadow-sm);
+  outline-offset: 2px;
+}
+.pagination__control:hover,
+.pagination__control:focus {
+  background: var(--color-surface);
+}
+.pagination__control.is-disabled {
+  color: var(--color-muted);
+  opacity: 0.6;
+  pointer-events: none;
+  box-shadow: none;
+}
+
+/* Numeric pages */
+.pagination__page,
+.pagination__page.is-current {
+  display: inline-flex;
+  min-width: 2.25rem;
+  height: 2.25rem;
+  padding-inline: var(--space-2);
+  align-items: center;
+  justify-content: center;
+  font-size: var(--fs-base);
+  line-height: 1;
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  border: 1px solid var(--color-light);
+  box-shadow: var(--shadow-sm);
+}
+
+.pagination__page {
+  color: var(--color-text);
+  background: var(--color-background);
+}
+.pagination__page:hover,
+.pagination__page:focus {
+  color: var(--color-primary);
+  background: var(--color-surface);
+}
+
+.pagination__page.is-current {
+  font-weight: 700;
+  color: #fff;
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+/* Ellipsis gap */
+.pagination__gap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  color: var(--color-muted);
+  user-select: none;
+}
+
+/* ≥640px: slightly larger tap targets */
+@media (min-width: 640px) {
+  .pagination { padding-block: var(--space-10); }
+  .pagination__page,
+  .pagination__page.is-current {
+    min-width: 2.5rem;
+    height: 2.5rem;
+  }
+}

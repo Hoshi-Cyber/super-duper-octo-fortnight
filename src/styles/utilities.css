@@ -1,0 +1,89 @@
+/* Utility classes for buttons, cards and CTAs */
+.btn {
+  display: inline-block;
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--radius-md);
+  font-size: var(--fs-base);
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  color: #ffffff;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: var(--color-primary-hover);
+}
+
+.btn-accent {
+  background-color: var(--color-accent);
+  color: #ffffff;
+}
+
+.btn-accent:hover,
+.btn-accent:focus {
+  background-color: #166c2f;
+}
+
+.card {
+  background-color: #ffffff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-6);
+}
+
+.stat-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  background-color: var(--color-light);
+  border-radius: var(--radius-lg);
+}
+
+.stat-badge .number {
+  font-size: var(--fs-3xl);
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.stat-badge .label {
+  font-size: var(--fs-base);
+  color: var(--color-muted);
+}
+
+/* Text color helpers */
+.text-muted {
+  color: var(--color-muted);
+}
+
+.text-primary {
+  color: var(--color-primary);
+}
+
+.text-accent {
+  color: var(--color-accent);
+}
+
+/* Background helpers */
+.bg-light { background-color: var(--color-light); }
+.bg-primary { background-color: var(--color-primary); }
+.bg-accent { background-color: var(--color-accent); }
+
+/* Hover variants (note: escaping colon for CSS class names) */
+.hover\:bg-light:hover { background-color: var(--color-light); }
+.hover\:text-primary:hover { color: var(--color-primary); }
+
+/* Text clamps */
+.line-clamp-1{
+  display:-webkit-box;
+  -webkit-line-clamp:1;
+  -webkit-box-orient:vertical;
+  overflow:hidden;
+}

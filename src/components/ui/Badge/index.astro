@@ -1,0 +1,14 @@
+---
+interface Props {
+  as?: 'span' | 'a';
+  href?: string;
+  title?: string;
+}
+const { as = 'span', href, title } = Astro.props;
+const sheet = new URL('./Badge.css', import.meta.url).toString();
+const Tag = (as === 'a' && href) ? 'a' : 'span';
+---
+<link rel="stylesheet" href={sheet} />
+<Tag class="ui-badge" href={Tag === 'a' ? href : undefined} title={title}>
+  <slot />
+</Tag>

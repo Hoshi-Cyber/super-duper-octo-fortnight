@@ -1,0 +1,206 @@
+---
+/**
+ * SamplesFilterBar — mobile-first filters for Samples page
+ * Emits: `samples:filter` CustomEvent from the root <section>
+ *
+ * Props:
+ *  - levels: string[]
+ *  - industries: string[]
+ *  - activeLevel?: string | null
+ *  - activeIndustry?: string | null
+ *  - query?: string
+ */
+import "./SamplesFilterBar.css";
+import { slug } from "@/utils/slug";
+
+interface Props {
+  levels: string[];
+  industries: string[];
+  activeLevel?: string | null;
+  activeIndustry?: string | null;
+  query?: string;
+}
+
+const {
+  levels = [],
+  industries = [],
+  activeLevel = null,
+  activeIndustry = null,
+  query = "",
+} = Astro.props as Props;
+
+// id refs for a11y
+const searchId = "samples-filter-search";
+---
+
+<section class="filterbar py-8 xs:py-10 md:py-12" data-section="samples-filter">
+  <div class="container">
+    <header class="filterbar__head">
+      <h2 class="filterbar__title">Filter samples</h2>
+    </header>
+
+    <!-- Controls -->
+    <div class="filterbar__controls" role="group" aria-label="Filters">
+      <!-- Level pills -->
+      <div class="filterbar__group" aria-label="Career level">
+        <p class="filterbar__eyebrow">Career level</p>
+        <div class="filterbar__pills" role="toolbar" aria-label="Career level options">
+          <button
+            type="button"
+            class="pill"
+            data-role="level"
+            data-value=""
+            data-slug=""
+            aria-pressed={(activeLevel === null || activeLevel === "") ? "true" : "false"}
+          >All</button>
+          {levels.map((lvl) => (
+            <button
+              type="button"
+              class="pill"
+              data-role="level"
+              data-value={lvl}
+              data-slug={slug(lvl)}
+              aria-pressed={activeLevel === lvl ? "true" : "false"}
+            >
+              {lvl}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <!-- Industry pills -->
+      <div class="filterbar__group" aria-label="Industry">
+        <p class="filterbar__eyebrow">Industry</p>
+        <div class="filterbar__pills" role="toolbar" aria-label="Industry options">
+          <button
+            type="button"
+            class="pill"
+            data-role="industry"
+            data-value=""
+            data-slug=""
+            aria-pressed={(activeIndustry === null || activeIndustry === "") ? "true" : "false"}
+          >All</button>
+          {industries.map((ind) => (
+            <button
+              type="button"
+              class="pill"
+              data-role="industry"
+              data-value={ind}
+              data-slug={slug(ind)}
+              aria-pressed={activeIndustry === ind ? "true" : "false"}
+            >
+              {ind}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <!-- Search + Clear -->
+      <div class="filterbar__searchRow">
+        <div class="filterbar__search">
+          <label class="sr-only" for={searchId}>Search samples</label>
+          <input
+            id={searchId}
+            class="filterbar__input"
+            type="search"
+            name="q"
+            placeholder="Search role, keywords…"
+            value={query}
+            inputmode="search"
+            autocomplete="off"
+          />
+        </div>
+        <button type="button" class="filterbar__clear" data-role="clear">Clear all</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tiny, framework-free controller -->
+  <script is:inline>
+    (() => {
+      const root = document.currentScript.closest('.filterbar');
+      if (!root) return;
+
+      const getPressed = (sel) => root.querySelector(`${sel}[aria-pressed="true"]`);
+
+      const state = {
+        level: {
+          value: getPressed('[data-role="level"]')?.getAttribute('data-value') || null,
+          slug:  getPressed('[data-role="level"]')?.getAttribute('data-slug')  || null,
+        },
+        industry: {
+          value: getPressed('[data-role="industry"]')?.getAttribute('data-value') || null,
+          slug:  getPressed('[data-role="industry"]')?.getAttribute('data-slug')  || null,
+        },
+        query: { value: root.querySelector('.filterbar__input')?.value || '' },
+      };
+
+      const emit = () => {
+        root.dispatchEvent(new CustomEvent('samples:filter', {
+          bubbles: true,
+          detail: {
+            level: state.level.value || null,
+            levelSlug: state.level.slug || null,
+            industry: state.industry.value || null,
+            industrySlug: state.industry.slug || null,
+            query: state.query.value || '',
+          }
+        }));
+      };
+
+      const setPressed = (groupSelector, target) => {
+        root.querySelectorAll(groupSelector).forEach(btn => btn.setAttribute('aria-pressed', 'false'));
+        target.setAttribute('aria-pressed', 'true');
+      };
+
+      // Level & industry pill clicks
+      root.addEventListener('click', (e) => {
+        const btn = e.target.closest('button.pill');
+        if (!btn) return;
+
+        const role = btn.getAttribute('data-role');
+        if (role === 'level') {
+          setPressed('[data-role="level"]', btn);
+          state.level.value = btn.getAttribute('data-value') || null;
+          state.level.slug  = btn.getAttribute('data-slug')  || null;
+          emit();
+        } else if (role === 'industry') {
+          setPressed('[data-role="industry"]', btn);
+          state.industry.value = btn.getAttribute('data-value') || null;
+          state.industry.slug  = btn.getAttribute('data-slug')  || null;
+          emit();
+        }
+      }, { passive: true });
+
+      // Search debounce
+      const input = root.querySelector('.filterbar__input');
+      let to;
+      input?.addEventListener('input', () => {
+        clearTimeout(to);
+        to = setTimeout(() => {
+          state.query.value = input.value || '';
+          emit();
+        }, 180);
+      });
+
+      // Clear all
+      root.querySelector('[data-role="clear"]')?.addEventListener('click', () => {
+        // reset pills
+        const firstLevel = root.querySelector('[data-role="level"][data-value=""]');
+        const firstIndustry = root.querySelector('[data-role="industry"][data-value=""]');
+        if (firstLevel) setPressed('[data-role="level"]', firstLevel);
+        if (firstIndustry) setPressed('[data-role="industry"]', firstIndustry);
+        state.level.value = null;
+        state.level.slug = null;
+        state.industry.value = null;
+        state.industry.slug = null;
+
+        // reset search
+        if (input) input.value = '';
+        state.query.value = '';
+
+        emit();
+      });
+    })();
+  </script>
+</section>

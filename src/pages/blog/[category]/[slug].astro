@@ -1,0 +1,107 @@
+---
+// File: src/pages/blog/[category]/[slug].astro
+import { getCollection, getEntry } from "astro:content";
+import BlogPost from "../../../components/layout/BlogPost.astro";
+import { prettyCategoryTitle } from "../../../lib/blog/categories";
+import {
+  categorySlug,
+  postSlugFromEntry,
+  postUrlFromEntry,
+  abs as absUrl,
+} from "../../../lib/slug";
+
+export const prerender = true;
+
+/** Build static paths from one source of truth */
+export async function getStaticPaths() {
+  const posts = await getCollection("blog");
+  return posts.map((p) => ({
+    params: {
+      category: categorySlug((p.data as any)?.category),
+      slug: postSlugFromEntry(p.slug),
+    },
+    props: { slug: p.slug },
+  }));
+}
+
+/** Load the entry using the collection slug provided via props */
+const { props } = Astro;
+const entry = await getEntry("blog", props.slug);
+if (!entry) {
+  return Astro.redirect("/404");
+}
+
+const { Content } = await entry.render();
+const data = entry.data as {
+  title: string;
+  description?: string;
+  seo?: any;
+  cover?: any;
+  ogImage?: any;
+  date?: string;
+  updated?: string;
+  updatedAt?: string;
+  author?: string;
+  tags?: string[];
+  category?: string;
+  readingTime?: number;
+  readingTimeMinutes?: number;
+};
+
+/** Canonical URL pieces via helpers */
+const cat = categorySlug(data.category);
+const postPath = postUrlFromEntry(entry);               // /blog/<cat>/<slug>/
+const canonical = absUrl(postPath, Astro.site);         // absolute if site is set
+
+/** Media + meta */
+const cover = data.cover ?? data.ogImage ?? null;
+const coverUrl = typeof cover === "string" ? cover : cover?.src ?? null;
+const readingTime = data.readingTime ?? data.readingTimeMinutes ?? null;
+
+/** JSON-LD */
+const breadcrumbs = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: absUrl("/", Astro.site) },
+    { "@type": "ListItem", position: 2, name: "Blog", item: absUrl("/blog/", Astro.site) },
+    { "@type": "ListItem", position: 3, name: prettyCategoryTitle(cat), item: absUrl(`/blog/${cat}/`, Astro.site) },
+    { "@type": "ListItem", position: 4, name: data.title, item: canonical },
+  ],
+};
+
+const modified = data.updated ?? data.updatedAt ?? data.date ?? undefined;
+const articleLd = {
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  mainEntityOfPage: { "@type": "WebPage", "@id": canonical },
+  headline: data.title,
+  description: data.description || undefined,
+  image: coverUrl ? [coverUrl] : undefined,
+  datePublished: data.date ? new Date(data.date).toISOString() : undefined,
+  dateModified: modified ? new Date(modified).toISOString() : undefined,
+  author: data.author ? [{ "@type": "Person", name: data.author }] : undefined,
+  articleSection: prettyCategoryTitle(cat),
+  keywords: Array.isArray(data.tags) ? data.tags.join(", ") : undefined,
+};
+---
+<BlogPost
+  title={data.title}
+  description={data.description}
+  seo={data.seo}
+  date={data.date}
+  author={data.author}
+  readingTime={readingTime}
+  tags={data.tags}
+  cover={cover}
+>
+  <fragment slot="head">
+    <link rel="canonical" href={canonical} />
+    <meta property="og:url" content={canonical} />
+    {coverUrl && <meta property="og:image" content={coverUrl} />}
+    <script type="application/ld+json" is:inline>{JSON.stringify(breadcrumbs)}</script>
+    <script type="application/ld+json" is:inline>{JSON.stringify(articleLd)}</script>
+  </fragment>
+
+  <Content />
+</BlogPost>

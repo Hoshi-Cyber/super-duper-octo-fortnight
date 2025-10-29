@@ -1,0 +1,20 @@
+@import "../../../styles/tokens.css";
+@import "../../../styles/typography.css";
+
+/* Neutral pill badge */
+.ui-badge {
+  display: inline-block;
+  padding: calc(var(--space-1) - 1px) var(--space-2);
+  border-radius: var(--radius-full, 9999px);
+  font: var(--font-caption, 500 0.8125rem/1 var(--font-sans));
+  letter-spacing: 0.01em;
+  background: var(--surface-2, var(--color-surface-2));
+  color: var(--text-2, var(--color-text-2));
+  border: 1px solid var(--border-1, var(--color-border-1));
+  white-space: nowrap;
+  text-decoration: none;
+}
+.ui-badge:focus-visible {
+  outline: 2px solid var(--focus, var(--color-focus));
+  outline-offset: 2px;
+}

@@ -1,0 +1,7 @@
+---
+const sheet = new URL('./TableWrap.css', import.meta.url).toString();
+---
+<link rel="stylesheet" href={sheet} />
+<div class="ui-tablewrap" tabindex="0" role="region" aria-label="Scrollable table">
+  <slot />
+</div>

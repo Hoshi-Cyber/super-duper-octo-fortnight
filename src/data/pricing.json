@@ -1,0 +1,45 @@
+[
+  {
+    "id": "starter",
+    "name": "Starter",
+    "priceRange": "KSh 1,000 – 1,500",
+    "description": "Entry‑level CV that passes ATS, perfect for students and new graduates.",
+    "features": [
+      "ATS‑optimized CV",
+      "One revision",
+      "Standard 3‑day delivery"
+    ],
+    "ctaLabel": "Choose Strater",
+    "highlight": false
+  },
+  {
+    "id": "pro",
+    "name": "Pro",
+    "priceRange": "KSh 2,500 – 3,000",
+    "description": "Ideal for mid‑career professionals seeking to stand out with a cover letter and LinkedIn refresh.",
+    "features": [
+      "ATS‑optimized CV",
+      "Cover letter",
+      "LinkedIn basics (headline & summary)",
+      "Two revisions",
+      "Priority delivery (2–3 days)"
+    ],
+    "ctaLabel": "Choose Pro",
+    "highlight": true
+  },
+  {
+    "id": "elite",
+    "name": "Elite",
+    "priceRange": "KSh 5,000 – 6,500",
+    "description": "Designed for senior executives who need full personal branding across CV, cover letter and LinkedIn.",
+    "features": [
+      "Senior‑level ATS‑optimized CV",
+      "Tailored cover letter",
+      "Full LinkedIn optimization (about, experience, skills, banner guidance)",
+      "Unlimited revisions for 14 days",
+      "48‑hour turnaround"
+    ],
+    "ctaLabel": "Choose Elite",
+    "highlight": false
+  }
+]

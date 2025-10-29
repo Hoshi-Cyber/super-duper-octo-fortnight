@@ -1,0 +1,43 @@
+---
+export interface Action { label: string; href: string }
+export interface Props {
+  title: string
+  sub?: string
+  eyebrow?: string
+  image?: string
+  alt?: string
+  actions?: Action[]
+}
+const { title, sub, eyebrow, image, alt = '', actions = [] } = Astro.props
+import './Hero.css'
+---
+<section class="hero section" data-section="service-hero" aria-labelledby="service-hero-title">
+  <div class="container hero__grid">
+    <header class="hero__header">
+      {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+      <h1 id="service-hero-title" class="h1">{title}</h1>
+      {sub && <p class="hero__sub">{sub}</p>}
+      {actions?.length ? (
+        <div class="hero__actions">
+          {actions.map(a => (
+            <a href={a.href} class="btn btn-primary" data-cta={`hero:${a.label}`}>{a.label}</a>
+          ))}
+        </div>
+      ) : null}
+    </header>
+
+    {image && (
+      <figure class="hero__media">
+        <img
+          src={image}
+          alt={alt}
+          width="1200"
+          height="900"
+          loading="eager"
+          decoding="async"
+          fetchpriority="high"
+        />
+      </figure>
+    )}
+  </div>
+</section>

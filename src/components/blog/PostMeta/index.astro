@@ -1,0 +1,71 @@
+---
+type DateLike = string | Date;
+
+interface PostMetaProps {
+  date?: DateLike;
+  updated?: DateLike;
+  author?: string;
+  readingTime?: number; // minutes
+}
+
+const { date, updated, author, readingTime } = Astro.props as PostMetaProps;
+
+const toDate = (d?: DateLike) => (d ? new Date(d) : undefined);
+const published = toDate(date);
+const modified = toDate(updated);
+
+const fmt = (d?: Date) =>
+  d
+    ? new Intl.DateTimeFormat("en-GB", { year: "numeric", month: "long", day: "numeric" }).format(d)
+    : null;
+
+const iso = (d?: Date) => (d ? d.toISOString() : undefined);
+
+const showUpdated =
+  published && modified ? modified.getTime() > published.getTime() : Boolean(modified);
+
+const hasMeta = Boolean(published || author || (typeof readingTime === "number" && readingTime > 0) || showUpdated);
+
+// Colocated CSS
+const sheet = new URL("./PostMeta.css", import.meta.url).toString();
+---
+{hasMeta && (
+  <>
+    <link rel="stylesheet" href={sheet} />
+    <dl class="post__meta">
+      {published && (
+        <>
+          <dt class="sr-only">Published</dt>
+          <dd>
+            <time datetime={iso(published)} itemprop="datePublished">{fmt(published)}</time>
+          </dd>
+        </>
+      )}
+
+      {showUpdated && modified && (
+        <>
+          <dt class="sr-only">Updated</dt>
+          <dd>
+            <time datetime={iso(modified)} itemprop="dateModified">{fmt(modified)}</time>
+          </dd>
+        </>
+      )}
+
+      {author && (
+        <>
+          <dt class="sr-only">Author</dt>
+          <dd itemprop="author" itemscope itemtype="https://schema.org/Person">
+            <span itemprop="name">{author}</span>
+          </dd>
+        </>
+      )}
+
+      {typeof readingTime === "number" && readingTime > 0 && (
+        <>
+          <dt class="sr-only">Reading time</dt>
+          <dd>{readingTime} min read</dd>
+        </>
+      )}
+    </dl>
+  </>
+)}

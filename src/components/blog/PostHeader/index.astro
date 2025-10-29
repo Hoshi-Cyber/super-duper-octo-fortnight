@@ -1,0 +1,13 @@
+---
+import type { PostHeaderProps } from "./types";
+import sheet from "./PostHeader.css?url";
+
+const { title, eyebrow, dek, id, class: className } = Astro.props as PostHeaderProps;
+---
+<link rel="stylesheet" href={sheet} />
+
+<header id={id} class={`post__header${className ? ` ${className}` : ""}`} data-section="post-header">
+  {eyebrow && <p class="post__eyebrow">{eyebrow}</p>}
+  <h1 class="post__title" itemprop="headline">{title}</h1>
+  {dek && <p class="post__dek">{dek}</p>}
+</header>

@@ -1,0 +1,27 @@
+node_modules/
+.pnpm-store/
+dist/
+.astro/
+.cache/
+.vscode/
+.DS_Store
+.env*
+!.env.example
+npm-debug.log*
+pnpm-debug.log*
+
+# guard against Windows device names
+NUL
+PRN
+CON
+AUX
+COM[1-9]
+LPT[1-9]
+
+# guard against Windows device names
+NUL
+PRN
+CON
+AUX
+COM[1-9]
+LPT[1-9]

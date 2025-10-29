@@ -1,0 +1,71 @@
+/* Breakpoint helpers — Fix Plan 62 compliant
+   Mobile-first from 320px. Progressive enhancement at sm/md/lg/xl/2xl. */
+
+/* Base: 320–639px */
+:root {
+  /* Typography base */
+  --fs-base: 1rem;               /* 16px default */
+
+  /* Layout container */
+  --container-px: 1rem;          /* side gutters */
+  --container-max: 100%;
+
+  /* Spacing rhythm for components */
+  --gap: 1rem;                   /* default intra-component gap */
+}
+
+/* Generic container utility for consistent page gutters */
+.container {
+  width: 100%;
+  max-width: var(--container-max);
+  padding-inline: var(--container-px);
+  margin-inline: auto;
+}
+
+/* sm ≥640px */
+@media (min-width: 640px) {
+  :root {
+    --container-px: 1.25rem;
+    --container-max: 640px;
+    --gap: 1.125rem;
+  }
+}
+
+/* md ≥768px */
+@media (min-width: 768px) {
+  :root {
+    --container-max: 768px;
+    --gap: 1.25rem;
+  }
+}
+
+/* lg ≥1024px */
+@media (min-width: 1024px) {
+  :root {
+    --fs-base: 1.0625rem;        /* subtle readability bump on large screens */
+    --container-max: 1024px;
+    --gap: 1.5rem;
+  }
+}
+
+/* xl ≥1280px */
+@media (min-width: 1280px) {
+  :root {
+    --container-max: 1280px;
+    --gap: 1.75rem;
+  }
+}
+
+/* 2xl ≥1536px */
+@media (min-width: 1536px) {
+  :root {
+    /* cap content for optimal line length on very wide viewports */
+    --container-max: 72rem;      /* 1152px */
+    --gap: 2rem;
+  }
+}
+
+/* Harder gutters for very small devices (≤359px) */
+@media (max-width: 359px) {
+  :root { --container-px: 0.875rem; }
+}

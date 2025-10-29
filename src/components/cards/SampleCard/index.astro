@@ -1,0 +1,82 @@
+---
+// src/components/cards/SampleCard/index.astro
+
+export interface Media {
+  src: string;
+  alt?: string;
+  width?: number;
+  height?: number;
+}
+
+export interface Props {
+  title: string;
+  // kept for modal only (not rendered inside the card)
+  before: string;
+  after: string;
+  eyebrow?: string;
+  compact?: boolean;
+  media?: Media | null;
+  ctaLabel?: string; // CTA text
+}
+
+const {
+  title,
+  before, // intentionally unused in-card
+  after,  // intentionally unused in-card
+  eyebrow = "Sample",
+  compact = false,
+  media = null,
+  ctaLabel = "View before / after",
+} = Astro.props as Props;
+
+const uid = `samplecard-${Math.random().toString(36).slice(2, 8)}`;
+
+// Fix Plan 95: static CSS import for Vite compatibility
+import sampleCardCss from "./SampleCard.css?url";
+---
+
+<style is:global>
+  @import "../../../styles/tokens.css";
+  @import "../../../styles/typography.css";
+  @import "../../../styles/utilities.css";
+  @import "../../../styles/breakpoints.css";
+</style>
+<link rel="stylesheet" href={sampleCardCss} />
+
+<article
+  class={`samplecard${compact ? " samplecard--compact" : ""}`}
+  data-section="samplecard"
+  aria-labelledby={`${uid}-title`}
+  role="group"
+>
+  {media?.src && (
+    <figure class="samplecard__media">
+      <img
+        src={media.src}
+        alt={media.alt ?? title}
+        width={media.width ?? 640}
+        height={media.height ?? 360}
+        loading="lazy"
+        decoding="async"
+        class="samplecard__img"
+      />
+    </figure>
+  )}
+
+  <header class="samplecard__head">
+    <p class="samplecard__eyebrow">{eyebrow}</p>
+    <h3 id={`${uid}-title`} class="h3 samplecard__title clamp-2">{title}</h3>
+  </header>
+
+  <!-- Footer CTA only; modal shows the before/after -->
+  <div class="samplecard__footer">
+    <button
+      type="button"
+      class="samplecard__cta btn btn-primary"
+      aria-label={`View before and after for ${title}`}
+      data-cta="samplecard-open"
+    >
+      {ctaLabel}
+    </button>
+  </div>
+</article>

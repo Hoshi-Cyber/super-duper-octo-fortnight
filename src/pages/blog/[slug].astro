@@ -1,0 +1,54 @@
+---
+/**
+ * File: src/pages/blog/[slug].astro
+ * Purpose: Permanently redirect legacy /blog/:slug → canonical /blog/:category/:slug/
+ * Behavior: Never renders a layout; avoids accidental unstyled output per Fix Plan 143.
+ */
+
+import { getCollection } from "astro:content";
+
+export const prerender = true;
+
+/** Build-time: only claim real, unique last-segment slugs so we don't shadow other routes */
+export async function getStaticPaths() {
+  const posts = await getCollection("blog");
+  const seen = new Set<string>();
+  const paths: { params: { slug: string } }[] = [];
+
+  for (const p of posts) {
+    const last = p.slug.split("/").pop()!;
+    if (seen.has(last)) continue; // skip duplicates to avoid path collisions
+    seen.add(last);
+    paths.push({ params: { slug: last } });
+  }
+
+  return paths;
+}
+
+/** Safe category slugifier */
+const slugify = (s: string) =>
+  String(s || "uncategorized")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+
+const slug = Astro.params.slug as string;
+
+/**
+ * Resolve canonical by scanning the collection for a post whose last path segment matches.
+ * This works even though getEntryBySlug requires the full "category/slug" path.
+ */
+const posts = await getCollection("blog");
+const match = posts.find((p) => p.slug.split("/").pop() === slug);
+
+const category =
+  match && typeof (match.data as any).category === "string"
+    ? slugify((match.data as any).category)
+    : "uncategorized";
+
+const target = match ? `/blog/${category}/${slug}/` : "/blog/";
+
+/** Permanent redirect for SEO canonicalization */
+return Astro.redirect(target, 301);
+---

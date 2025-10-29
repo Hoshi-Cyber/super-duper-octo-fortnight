@@ -1,0 +1,111 @@
+---
+import "./Breadcrumbs.css";
+import { slug } from "@/utils/slug";
+
+export interface Crumb {
+  label: string;
+  href?: string;
+  current?: boolean;
+}
+
+export interface Props {
+  items?: Crumb[];
+  /** Normalize legacy blog paths and enforce canonical slugs */
+  normalize?: boolean;
+}
+
+const { items = [], normalize = true } = Astro.props as Props;
+
+// Normalize: last item is current unless explicitly overridden
+const normalized: Crumb[] = items.map((c, i) => {
+  const isLast = i === items.length - 1;
+  const current = c.current ?? (isLast || !c.href);
+  return { ...c, current };
+});
+
+// Site base for JSON-LD URL resolution
+const site = (Astro.site && Astro.site.toString()) || "/";
+
+/** Canonicalize blog hrefs and slugify category/tag segments */
+const normalizeHref = (href: string) => {
+  if (!normalize || !href) return href;
+  try {
+    const u = new URL(href, site);
+    let p = u.pathname.replace(/\/{2,}/g, "/");
+
+    // 1) Legacy: /blog/category/<cat>/ → /blog/<cat>/
+    const legacy = p.match(/^\/blog\/category\/([^/]+)\/?$/);
+    if (legacy) {
+      p = `/blog/${slug(decodeURIComponent(legacy[1]))}/`;
+    } else {
+      // 2) Tag route: /blog/tag/<tag>/ → slugged tag
+      const tag = p.match(/^\/blog\/tag\/([^/]+)\/?$/);
+      if (tag) {
+        p = `/blog/tag/${slug(decodeURIComponent(tag[1]))}/`;
+      } else {
+        // 3) Single-segment category: /blog/<cat>/ → slugged cat
+        const cat = p.match(/^\/blog\/([^/]+)\/?$/);
+        if (cat && !["tag", "page", "rss", "categories", "tags"].includes(cat[1])) {
+          p = `/blog/${slug(decodeURIComponent(cat[1]))}/`;
+        }
+      }
+    }
+
+    // Ensure trailing slash on blog paths
+    if (/^\/blog(\/.*)?$/.test(p) && !p.endsWith("/")) p = p + "/";
+
+    u.pathname = p;
+    u.search = "";
+    u.hash = "";
+    return u.toString();
+  } catch {
+    return href;
+  }
+};
+
+const resolveUrl = (href: string) => {
+  try {
+    return new URL(href, site).toString();
+  } catch {
+    return href;
+  }
+};
+
+// JSON-LD for BreadcrumbList (emit canonicalized links)
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: normalized.map((c, i) => {
+    const href = c.href ? normalizeHref(c.href) : undefined;
+    return {
+      "@type": "ListItem",
+      position: i + 1,
+      name: c.label,
+      ...(href && !c.current ? { item: resolveUrl(href) } : {}),
+    };
+  }),
+};
+---
+
+{normalized.length ? (
+  <nav class="breadcrumbs" aria-label="Breadcrumb">
+    <ol class="breadcrumbs__list">
+      {normalized.map((c, i) => {
+        const href = c.href ? normalizeHref(c.href) : undefined;
+        return (
+          <li class="breadcrumbs__item" key={`${c.label}-${i}`}>
+            {c.current || !href ? (
+              <span class="breadcrumbs__current" aria-current="page">{c.label}</span>
+            ) : (
+              <a class="breadcrumbs__link" href={href} data-cta="breadcrumb">{c.label}</a>
+            )}
+          </li>
+        );
+      })}
+    </ol>
+  </nav>
+) : null}
+
+<script type="application/ld+json" is:inline>
+  {JSON.stringify(jsonLd)}
+</script>

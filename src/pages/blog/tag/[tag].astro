@@ -1,0 +1,132 @@
+---
+// File: src/pages/blog/tag/[tag].astro
+import BaseLayout from "@/components/layout/BaseLayout.astro";
+import PostCard from "@/components/blog/PostCard/index.astro";
+import "@/styles/components/PostGrid.css";
+import { getCollection } from "astro:content";
+import siteConfig from "@/site.config.json";
+import { slug } from "@/utils/slug";
+
+export const prerender = true;
+
+/** Build static paths with canonical tag slugs */
+export async function getStaticPaths() {
+  const posts = await getCollection(
+    "blog",
+    ({ data }) => !data.draft && Array.isArray(data.tags)
+  );
+  const tagSet = new Set<string>();
+  for (const p of posts) for (const t of p.data.tags) tagSet.add(t);
+  return Array.from(tagSet).map((t) => ({ params: { tag: slug(t) } }));
+}
+
+/** Params and display label resolution */
+const { tag } = Astro.params as { tag: string };
+const tagSlug = slug(tag);
+
+/** Collect all eligible posts and filter by slugged tag */
+const all = await getCollection(
+  "blog",
+  ({ data }) =>
+    !data.draft &&
+    Array.isArray(data.tags) &&
+    data.tags.some((t: string) => slug(t) === tagSlug)
+);
+
+/** Try to recover a pretty display label from actual tags */
+let displayTag = tagSlug;
+for (const p of all) {
+  const match = (p.data.tags as string[]).find((t) => slug(t) === tagSlug);
+  if (match) { displayTag = match; break; }
+}
+
+/** Map → sort */
+const posts = all
+  .map((p) => {
+    const thumb = p.data.thumbnail ?? p.data.image ?? p.data.cover ?? p.data.ogImage ?? null;
+    const thumbSrc = typeof thumb === "string" ? thumb : thumb?.src ?? "/assets/logos/logo-wide-1200.png";
+    const thumbAlt = typeof thumb === "object" && thumb?.alt ? thumb.alt : p.data.title ?? "Post thumbnail";
+    return {
+      url: `/blog/${p.slug}/`,
+      title: p.data.title,
+      description: p.data.description,
+      readMin: p.data.readingTimeMinutes ?? p.data.readingTime ?? null,
+      stage: p.data.stage ?? null,
+      date: new Date(p.data.date),
+      dateISO: new Date(p.data.date).toISOString(),
+      thumbnailSrc: thumbSrc,
+      thumbnailAlt: thumbAlt,
+    };
+  })
+  .sort((a, b) => b.date.getTime() - a.date.getTime());
+
+/** Env-aware base */
+const isDev = import.meta.env.DEV;
+const base = isDev ? "" : siteConfig.siteUrl;
+
+/** Canonical for the tag: relative in dev, absolute in prod */
+const canonical = `${base}/blog/tag/${encodeURIComponent(tagSlug)}/`;
+
+/** JSON-LD (env-aware absolute fields) */
+const breadcrumbList = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: isDev ? undefined : siteConfig.siteUrl },
+    { "@type": "ListItem", position: 2, name: "Blog", item: isDev ? undefined : new URL("/blog/", base).toString() },
+    { "@type": "ListItem", position: 3, name: `Tag: ${displayTag}`, item: isDev ? undefined : canonical },
+  ],
+};
+
+const itemList = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  itemListElement: posts.map((p, i) => ({
+    "@type": "ListItem",
+    position: i + 1,
+    url: isDev ? p.url : new URL(p.url, base).toString(),
+    name: p.title,
+  })),
+};
+---
+
+<BaseLayout title={`Tag: ${displayTag}`} description={`Articles tagged ${displayTag} on CV Writing Kenya`}>
+  <fragment slot="head">
+    <link rel="canonical" href={canonical} />
+    <meta property="og:url" content={canonical} />
+    <script type="application/ld+json">{JSON.stringify(breadcrumbList)}</script>
+    <script type="application/ld+json">{JSON.stringify(itemList)}</script>
+  </fragment>
+
+  <section class="container" style="padding: var(--space-8) var(--space-4);">
+    <header style="max-width:56rem; margin-bottom: var(--space-6);">
+      <h1 class="h2" style="margin: 0 0 var(--space-2);">Tag: {displayTag}</h1>
+      <p class="text-muted" style="margin: 0;">
+        {posts.length} {posts.length === 1 ? "post" : "posts"}
+      </p>
+    </header>
+
+    {posts.length === 0 ? (
+      <p class="text-muted">No posts yet for this tag.</p>
+    ) : (
+      <ol class="post-grid" data-section="grid">
+        {posts.map((p, i) => (
+          <li>
+            <PostCard
+              url={p.url}
+              title={p.title}
+              excerpt={p.description}
+              dateISO={p.dateISO}
+              readMin={p.readMin}
+              stage={p.stage}
+              thumbnailSrc={p.thumbnailSrc}
+              thumbnailAlt={p.thumbnailAlt}
+              data-pos={i + 1}
+              data-cta="post-card"
+            />
+          </li>
+        ))}
+      </ol>
+    )}
+  </section>
+</BaseLayout>

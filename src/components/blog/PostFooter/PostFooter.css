@@ -1,0 +1,9 @@
+@import "../../../styles/tokens.css";
+@import "../../../styles/typography.css";
+
+/* Scope to post only */
+.post .post__footer {
+  margin-top: var(--space-10);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--color-border);
+}

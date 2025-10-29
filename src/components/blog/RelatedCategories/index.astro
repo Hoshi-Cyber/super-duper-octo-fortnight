@@ -1,0 +1,57 @@
+---
+import "./RelatedCategories.css";
+
+export interface RelatedItem { title: string; slug: string }
+export interface Props {
+  items: RelatedItem[];
+  current?: string | null;
+  title?: string;
+  variant?: "default" | "compact";
+}
+
+const {
+  items = [],
+  current = null,
+  title = "Related categories",
+  variant = "default",
+} = Astro.props as Props;
+
+const safeItems = (items || []).filter(Boolean);
+const headingId = "rc-heading";
+
+const slugify = (s: string) =>
+  String(s || "uncategorized")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+---
+<!-- No inner .container here. Width is governed by the page-level container. -->
+<section class={`rc ${variant === "compact" ? "rc--compact" : ""}`} aria-labelledby={headingId} data-section="related-categories">
+  <h2 id={headingId} class="section-title">{title}</h2>
+
+  {safeItems.length === 0 ? (
+    <p class="text-muted">No related categories configured.</p>
+  ) : (
+    <ul class="rc__list" aria-label="Related categories">
+      {safeItems.map((r) => {
+        const catSlug = slugify(r.slug);
+        const href = `/blog/${catSlug}/`; // canonical category path per Fix Plan 125
+        const isCurrent = !!(current && slugify(String(current)) === catSlug);
+        return (
+          <li>
+            <a
+              class={`rc__link${isCurrent ? " rc__link--solid" : ""}`}
+              href={href}
+              {...(isCurrent ? { "aria-current": "true" } : {})}
+              data-cta="related-category"
+              aria-label={`View ${r.title} posts`}
+            >
+              {r.title}
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  )}
+</section>

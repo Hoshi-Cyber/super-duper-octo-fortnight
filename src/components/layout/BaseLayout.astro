@@ -1,0 +1,120 @@
+---
+// File: src/components/layout/BlogPost.astro
+import MainNav from "./Nav/index.astro";
+import Footer from "./Footer/index.astro";
+import CookieBanner from "../CookieBanner/index.astro";
+import "../../styles/index.css";
+import siteConfig from "@/site.config.json";
+
+export interface Props {
+  title?: string;
+  description?: string;
+  seo?: { canonical?: string; ogImage?: string } | Record<string, unknown>;
+}
+
+const { title = "", description = "", seo = {} } = Astro.props as Props;
+const headTitle = String(title).trim() || "CV Writing Kenya";
+
+const isDev = import.meta.env.DEV;
+const base = isDev ? "" : siteConfig.siteUrl;
+
+// Canonical: relative in dev, absolute in prod
+const canonical = (() => {
+  const fromSeo = (seo as any)?.canonical as string | undefined;
+  if (isDev) return fromSeo || Astro.url.pathname;
+  return fromSeo ? new URL(fromSeo, base).toString() : `${base}${Astro.url.pathname}`;
+})();
+
+// OG image: relative in dev, absolute in prod
+const ogImage = (() => {
+  const fromSeo = (seo as any)?.ogImage as string | undefined;
+  if (isDev) return fromSeo || "/assets/logos/logo-square-512.png";
+  return (fromSeo
+    ? new URL(fromSeo, base)
+    : new URL("/assets/logos/logo-square-512.png", base)
+  ).toString();
+})();
+
+const gtmId: string = (siteConfig as any).gtmId ?? "GTM-XXXXXXX";
+---
+<!DOCTYPE html>
+<html lang="en" data-gtm={gtmId}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>{headTitle}</title>
+    {description && <meta name="description" content={description} />}
+    <link rel="canonical" href={canonical} />
+
+    <!-- Performance: network hints -->
+    <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+
+    <link rel="icon" href="/assets/logos/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/logos/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/logos/favicon-16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/logos/apple-touch-icon-180.png" />
+
+    <meta property="og:site_name" content="CV Writing Kenya" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content={headTitle} />
+    {description && <meta property="og:description" content={description} />}
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+  </head>
+  <body class="flex min-h-screen flex-col">
+    <noscript>
+      <iframe
+        src={"https://www.googletagmanager.com/ns.html?id="+gtmId}
+        height="0"
+        width="0"
+        style="display:none;visibility:hidden">
+      </iframe>
+    </noscript>
+
+    <MainNav />
+    <main id="main-content" class="flex-grow page-content" role="main" tabindex="-1" data-section="main">
+      <slot />
+    </main>
+    <Footer />
+    <CookieBanner />
+
+    <!-- Analytics listener (CTA + scroll depth) -->
+    <script type="module" src="/src/scripts/analytics/cta-listeners.ts" defer></script>
+
+    <!-- CMP hook → grant analytics only on accept -->
+    <script is:inline>
+      (function () {
+        function grantAnalyticsOnly() {
+          try {
+            if (typeof window.gtag === 'function') {
+              window.gtag('consent','update',{
+                analytics_storage:'granted',
+                functionality_storage:'granted',
+                security_storage:'granted',
+                ad_storage:'denied',
+                ad_user_data:'denied',
+                ad_personalization:'denied'
+              });
+            } else if (Array.isArray(window.dataLayer)) {
+              window.dataLayer.push({ event:'consent_update_fallback', analytics_storage:'granted' });
+            }
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push({ event:'update_consent', consent:'analytics_granted' });
+          } catch (_) {}
+        }
+
+        window.addEventListener('cmp:accept', grantAnalyticsOnly);
+        window.addEventListener('cookie:accept', grantAnalyticsOnly);
+
+        document.addEventListener('click', function(e){
+          var t = e.target;
+          if (!(t instanceof Element)) return;
+          var accept = t.closest('[data-consent="accept"], [data-cmp="accept"], #cookie-accept');
+          if (accept) grantAnalyticsOnly();
+        }, { capture:true });
+      })();
+    </script>
+  </body>
+</html>

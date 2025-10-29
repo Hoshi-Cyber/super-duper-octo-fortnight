@@ -1,0 +1,62 @@
+/* Mobile-first. Uses brand tokens and global utilities. */
+
+.breadcrumbs {
+  padding-block: var(--space-2);
+  font-size: var(--fs-sm);
+  color: var(--color-muted);
+}
+
+.breadcrumbs__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.breadcrumbs__item {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0; /* allow truncation */
+}
+
+/* Separator */
+.breadcrumbs__item + .breadcrumbs__item::before {
+  content: "/";
+  margin-inline: var(--space-2);
+  color: var(--color-muted);
+  opacity: 0.6;
+}
+
+/* Links */
+.breadcrumbs__link {
+  color: var(--color-muted);
+  text-decoration: none;
+  outline-offset: 2px;
+  max-width: 40ch;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.breadcrumbs__link:hover,
+.breadcrumbs__link:focus {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+/* Current page */
+.breadcrumbs__current {
+  color: var(--color-text);
+  font-weight: 600;
+  max-width: 40ch;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Slight readability bump on larger screens */
+@media (min-width: 640px) {
+  .breadcrumbs { font-size: var(--fs-base); }
+}

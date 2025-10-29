@@ -1,0 +1,36 @@
+@import "../../../styles/tokens.css";
+@import "../../../styles/typography.css";
+@import "../../../styles/utilities.css";
+
+/* Scope strictly to the post context */
+.post .post__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-6);
+  padding: 0;
+  list-style: none;
+}
+
+.post .post__tags--footer {
+  margin-top: var(--space-8);
+}
+
+.post .post__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: .375rem;
+  padding: .25rem .6rem;
+  border-radius: var(--radius-full);
+  background: var(--color-light);
+  color: var(--color-text);
+  box-shadow: inset 0 0 0 1px rgba(17, 24, 39, .08);
+  font-size: var(--fs-sm);
+  line-height: 1;
+  text-decoration: none;
+}
+
+.post .post__tag:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}

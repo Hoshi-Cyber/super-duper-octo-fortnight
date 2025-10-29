@@ -1,0 +1,23 @@
+@import "../../../styles/tokens.css";
+@import "../../../styles/typography.css";
+
+/* Scope to post only */
+.post .post__sources { margin-top: var(--space-10); }
+.post .post__sources-title {
+  margin: 0 0 var(--space-3);
+  font-size: var(--fs-lg);
+}
+.post .post__sources-list {
+  margin: 0;
+  padding-left: 1.125rem;
+  display: grid;
+  gap: .375rem;
+}
+.post .post__sources a {
+  color: var(--color-link);
+  text-decoration: underline;
+}
+.post .post__sources a:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}

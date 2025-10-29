@@ -1,0 +1,152 @@
+---
+// src/pages/samples/index.astro
+import BaseLayout from "../../components/layout/BaseLayout.astro";
+import SampleCard from "../../components/cards/SampleCard/index.astro";
+import LeadCaptureBanner from "../../components/cta/LeadCaptureBanner/index.astro";
+import SamplesFilterBar from "../../components/filters/SamplesFilterBar/index.astro";
+import SamplePreviewModal from "../../components/modals/SamplePreviewModal/index.astro";
+
+import samples from "../../data/pages/samples";
+
+const { title, description, seo, filters, items } = samples;
+---
+
+<BaseLayout title={title} description={description} seo={seo}>
+  <!-- Header -->
+  <section class="container py-8">
+    <h1>{title}</h1>
+    <p>{description}</p>
+  </section>
+
+  <!-- Filters -->
+  <section class="container">
+    <SamplesFilterBar levels={filters.levels} industries={filters.industries} />
+  </section>
+
+  <!-- Grid -->
+  <section class="container mt-8" aria-label="Before & After Samples">
+    <h2 class="sr-only">Before & After Samples</h2>
+    <p class="text-muted mb-4">
+      We remove all identifying details. These samples show how we transform content to highlight impact.
+    </p>
+
+    <!-- 1 → 2 (sm) → 3 (lg) → 4 (xl+) -->
+    <div id="samples-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 xl:gap-8">
+      {items.map((it) => (
+        <div
+          class="sample-item"
+          role="button"
+          tabindex="0"
+          data-level={it.level}
+          data-industry={it.industry}
+          data-title={it.title}
+          data-before={it.before}
+          data-after={it.after}
+          data-media={it.media ? JSON.stringify({ src: it.media.src, alt: it.media.alt ?? it.title }) : ""}
+          aria-label={`Preview ${it.title}`}
+        >
+          <SampleCard
+            title={it.title}
+            before={it.before}
+            after={it.after}
+            media={it.media ?? null}
+          />
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Modal -->
+  <SamplePreviewModal open={false} title="Preview" before="" after="" media={null} />
+
+  <!-- CTA -->
+  <section class="container mt-12" aria-label="Call to action">
+    <LeadCaptureBanner
+      title="Want results like these?"
+      sub="Get a tailored, ATS-optimized CV and profile that wins interviews."
+      primaryHref="/contact/"
+      primaryLabel="Get Yours"
+    />
+  </section>
+
+  <!-- Controller: filtering + modal -->
+  <script is:inline>
+    (() => {
+      const grid = document.getElementById('samples-grid');
+      if (!grid) return;
+
+      const modal = document.querySelector('.spm');
+      const modalTitle = modal?.querySelector('.spm__title');
+      const modalBlocks = modal?.querySelectorAll('.spm__text');
+      const modalImg = modal?.querySelector('.spm__media img') || null;
+      const mediaFigure = modal?.querySelector('.spm__media');
+
+      // Filtering
+      document.addEventListener('samples:filter', (e) => {
+        const { level, industry, query } = e.detail || {};
+        const q = (query || '').toLowerCase().trim();
+
+        grid.querySelectorAll('.sample-item').forEach((el) => {
+          const lv = el.getAttribute('data-level') || '';
+          const ind = el.getAttribute('data-industry') || '';
+          const title = (el.getAttribute('data-title') || '').toLowerCase();
+          const before = (el.getAttribute('data-before') || '').toLowerCase();
+          const after = (el.getAttribute('data-after') || '').toLowerCase();
+
+          const hitLevel = !level || lv === level;
+          const hitInd   = !industry || ind === industry;
+          const hitQ     = !q || title.includes(q) || before.includes(q) || after.includes(q);
+
+          el.style.display = (hitLevel && hitInd && hitQ) ? '' : 'none';
+        });
+      }, { passive: true });
+
+      // Modal open
+      const openModal = (el) => {
+        if (!modal) return;
+        const title = el.getAttribute('data-title') || 'Preview';
+        const before = el.getAttribute('data-before') || '';
+        const after  = el.getAttribute('data-after') || '';
+        let media = null;
+        try { media = JSON.parse(el.getAttribute('data-media') || "null"); } catch {}
+
+        if (modalTitle) modalTitle.textContent = title;
+        if (modalBlocks && modalBlocks.length >= 2) {
+          modalBlocks[0].textContent = before;
+          modalBlocks[1].textContent = after;
+        }
+
+        if (media && modalImg && mediaFigure) {
+          modalImg.src = media.src;
+          modalImg.alt = media.alt || title;
+          mediaFigure.removeAttribute('hidden');
+        } else if (mediaFigure) {
+          mediaFigure.setAttribute('hidden', 'true');
+        }
+
+        modal.classList.add('is-open');
+        modal.setAttribute('aria-hidden', 'false');
+      };
+
+      // Click anywhere on card OR the CTA button
+      grid.addEventListener('click', (e) => {
+        const cta = e.target.closest('.samplecard__cta');
+        const card = cta ? cta.closest('.sample-item') : e.target.closest('.sample-item');
+        if (cta) e.preventDefault();
+        if (card) openModal(card);
+      }, { passive: false });
+
+      // Keyboard open (Enter/Space) on card or CTA
+      grid.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        const targetItem = e.target.closest('.sample-item');
+        if (targetItem) { e.preventDefault(); openModal(targetItem); return; }
+        const cta = e.target.closest('.samplecard__cta');
+        if (cta) {
+          const wrapper = cta.closest('.sample-item');
+          if (wrapper) { e.preventDefault(); openModal(wrapper); }
+        }
+      });
+    })();
+  </script>
+</BaseLayout>

@@ -1,0 +1,211 @@
+---
+// File: src/pages/blog/[category].astro
+/**
+ * Category landing (page 1)
+ * Canonical paths:
+ * - Category: /blog/<category>/
+ * - Post:     /blog/<category>/<slug>/
+ */
+
+import BaseLayout from "../../components/layout/BaseLayout.astro";
+import Breadcrumbs from "../../components/blog/Breadcrumbs/index.astro";
+import CategoryHero from "../../components/blog/CategoryHero/index.astro";
+import Pagination from "../../components/blog/Pagination/index.astro";
+import CollectionSchema from "../../components/blog/CollectionSchema/index.astro";
+import RelatedCategories from "../../components/blog/RelatedCategories/index.astro";
+import LeadMagnetStrip from "../../components/blog/LeadMagnetStrip/index.astro";
+import PostFeedLatest from "../../components/blog/PostFeedLatest/index.astro";
+
+import { getCollection } from "astro:content";
+import {
+  PER_PAGE,
+  relatedCategories,
+  prettyCategoryTitle,
+  buildCategoryTitle,
+  buildCategoryDescription,
+} from "../../lib/blog/categories";
+import {
+  categorySlug,
+  postUrlFromEntry,
+} from "../../lib/slug";
+
+export const prerender = true;
+
+/** Static paths from canonical category list */
+export async function getStaticPaths() {
+  const { CATEGORIES } = await import("../../lib/blog/categories");
+  return CATEGORIES.map((c: string) => ({
+    params: { category: categorySlug(c) },
+  }));
+}
+
+/** Params */
+const { category } = Astro.params as { category: string };
+const cat = categorySlug(category);
+
+/** Validate category */
+const { CATEGORIES } = await import("../../lib/blog/categories");
+const ALLOWED = new Set<string>(CATEGORIES.map((c: string) => categorySlug(c)));
+if (!ALLOWED.has(cat)) {
+  return Astro.redirect("/404");
+}
+
+/** Thumbnail resolver */
+function getThumb(p: any) {
+  const t = p.data?.thumbnail ?? p.data?.image ?? p.data?.cover ?? p.data?.ogImage ?? null;
+  const src = typeof t === "string" ? t : t?.src ?? "/assets/logos/logo-wide-1200.png";
+  const alt = (typeof t === "object" && t?.alt) ? t.alt : p.data?.title ?? "Post thumbnail";
+  return { src, alt };
+}
+
+/** Fetch, map, sort */
+let all: any[] = [];
+try {
+  all = await getCollection("blog", ({ data }) => !data.draft && categorySlug(data.category) === cat);
+} catch {
+  all = [];
+}
+
+const posts = all
+  .map((p) => {
+    const { src: thumbnailSrc, alt: thumbnailAlt } = getThumb(p);
+    const date = new Date(p.data.date);
+    return {
+      url: postUrlFromEntry(p), // single source of truth
+      title: p.data.title,
+      description: p.data.description,
+      stage: p.data.stage ?? null,
+      readMins: p.data.readingTimeMinutes ?? p.data.readingTime ?? null,
+      date,
+      dateISO: isNaN(date.getTime()) ? undefined : date.toISOString(),
+      thumbnailSrc,
+      thumbnailAlt,
+    };
+  })
+  .sort((a, b) => b.date.getTime() - a.date.getTime());
+
+/** Pagination (page 1) */
+const pageCount = Math.max(1, Math.ceil(posts.length / PER_PAGE));
+const pageItems = posts.slice(0, PER_PAGE);
+
+/** Map to PostFeedLatest shape */
+const basePath = `/blog/${cat}`;
+const feedPosts = pageItems.map((p) => ({
+  url: p.url,
+  frontmatter: {
+    title: p.title,
+    description: p.description,
+    date: p.dateISO ?? new Date().toISOString(),
+    readingTime: typeof p.readMins === "number" ? p.readMins : undefined,
+    category: prettyCategoryTitle(cat),
+    cover: p.thumbnailSrc ? { src: p.thumbnailSrc, alt: p.thumbnailAlt ?? p.title } : undefined,
+  },
+}));
+
+/** URLs + SEO */
+const pretty = prettyCategoryTitle(cat);
+const pageTitle = buildCategoryTitle(cat);
+const desc = buildCategoryDescription(cat);
+const canonical = `${basePath}/`;
+const nextUrl = pageCount > 1 ? `${basePath}/page/2/` : null;
+
+/** Hero stats */
+const postCount = posts.length;
+const lastUpdated = posts[0]?.date ?? null;
+const readRange = "4–9 min";
+
+/** First card image for OG + preload */
+const ogImage = pageItems[0]?.thumbnailSrc ?? null;
+
+/** Breadcrumbs */
+const breadcrumbItems = [
+  { label: "Home", href: "/" },
+  { label: "Blog", href: "/blog/" },
+  { label: pretty, current: true },
+];
+---
+
+<BaseLayout title={pageTitle} description={desc} seo={{ canonical }}>
+  <fragment slot="head">
+    <link rel="canonical" href={canonical} />
+    {nextUrl && <link rel="next" href={nextUrl} />}
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:url" content={canonical} />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    {ogImage && <link rel="preload" as="image" href={ogImage} />}
+  </fragment>
+
+  {/* JSON-LD: CollectionPage + ItemList */}
+  <CollectionSchema
+    pageInfo={{
+      title: pretty,
+      url: canonical,
+      description: desc,
+      totalItems: postCount,
+      page: 1,
+      totalPages: pageCount,
+      breadcrumb: [
+        { name: "Home", url: "/" },
+        { name: "Blog", url: "/blog/" },
+        { name: pretty },
+      ],
+    }}
+    items={pageItems.map((p) => ({
+      title: p.title,
+      url: p.url,
+      image: p.thumbnailSrc,
+      datePublished: p.dateISO,
+      authorName: undefined,
+      description: p.description,
+    }))}
+  />
+
+  <section class="container page-gap-after" data-section="category">
+    <Breadcrumbs items={breadcrumbItems} />
+
+    <div class="stack" style="--section-gap: clamp(var(--space-3), 1.5vw, var(--space-5));">
+      <CategoryHero
+        title={pretty}
+        dek={desc}
+        stats={{ postCount, lastUpdated: lastUpdated ?? undefined, readRange }}
+        primaryCta={{ href: "/services/cv-rewrite?utm_source=blog&utm_medium=category&utm_campaign=hero", label: "Book CV Rewrite" }}
+        secondaryCta={{ href: "/offers/free-cv-audit?utm_source=blog&utm_medium=category&utm_campaign=hero", label: "Free 24-Point CV Audit" }}
+      />
+
+      <div class="stack" style="--section-gap: clamp(var(--space-8), 3.5vw, var(--space-12));">
+        <section aria-label="Latest articles">
+          <PostFeedLatest
+            posts={feedPosts}
+            pageSize={PER_PAGE}
+            eyebrow="Latest"
+            title="Latest articles"
+            moreHref={`${basePath}/`}
+          />
+        </section>
+
+        <LeadMagnetStrip
+          title="Get the CV Optimization PDF"
+          sub="Join 12,000+ professionals receiving actionable, local career tactics."
+          action="/api/subscribe"
+          source="blog_category_leadmagnet"
+        />
+
+        {pageCount > 1 && <Pagination basePath={basePath} current={1} total={pageCount} />}
+
+        <RelatedCategories
+          items={relatedCategories(cat).slice(0, 3)}
+          current={cat}
+          title="Related categories"
+          variant="compact"
+        />
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .section-sort { margin-top: var(--space-2); }
+  .section-sort__list { display:flex; gap: var(--space-3); padding:0; margin:0; list-style:none; }
+  .section-sort__link { font-size: var(--fs-sm); color: var(--color-muted); text-decoration:none; }
+  .section-sort__link[aria-selected="true"] { color: var(--color-primary); font-weight:600; }
+</style>

@@ -1,0 +1,64 @@
+---
+export interface Logo { src: string; alt?: string; width?: number; height?: number }
+export interface Rating { score?: number; count?: number; label?: string }
+
+export interface Props {
+  variant?: "default" | "compact";
+  eyebrow?: string;
+  rating?: Rating;               // may be undefined
+  logos?: Logo[];
+}
+
+const {
+  variant = "default",
+  eyebrow = "",
+  rating = {},
+  logos = [],
+} = Astro.props as Props;
+
+const s = Number.isFinite(rating?.score as number) ? (rating!.score as number) : null;
+const scoreText = s !== null ? s.toFixed(1) : null;
+const countText = Number.isFinite(rating?.count as number) ? (rating!.count as number).toLocaleString() : null;
+const labelText = rating?.label ?? "Rating";
+---
+<section class={`trust ${variant === "compact" ? "trust--compact" : ""}`} aria-label="Social proof">
+  <div class="container trust__wrap">
+    {eyebrow && <p class="trust__eyebrow">{eyebrow}</p>}
+
+    {scoreText && (
+      <p class="trust__rating">
+        <span class="trust__score" aria-label={`${labelText}: ${scoreText} out of 5`}>{scoreText}</span>
+        {countText && <span class="trust__count">({countText})</span>}
+      </p>
+    )}
+
+    {logos.length > 0 && (
+      <ul class="trust__logos" aria-label="Featured by">
+        {logos.map((l) => (
+          <li class="trust__logo">
+            <img
+              src={l.src}
+              alt={l.alt ?? ""}
+              width={l.width ?? 120}
+              height={l.height ?? 40}
+              loading="lazy"
+              decoding="async"
+            />
+          </li>
+        ))}
+      </ul>
+    )}
+  </div>
+</section>
+
+<style>
+  .trust{padding-block:var(--space-6);border-top:1px solid rgba(17,24,39,.06);background:var(--color-background)}
+  .trust__wrap{display:grid;gap:.5rem;justify-items:center;text-align:center}
+  .trust__eyebrow{margin:0;font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--color-muted)}
+  .trust__rating{margin:.25rem 0 0;color:var(--color-text)}
+  .trust__score{font-weight:700}
+  .trust__count{margin-left:.25rem;color:var(--color-muted);font-size:.9em}
+  .trust__logos{display:flex;gap:1rem;flex-wrap:wrap;align-items:center;justify-content:center;margin:0;padding:0;list-style:none}
+  .trust__logo img{opacity:.9;filter:grayscale(100%);max-height:44px}
+  .trust--compact{padding-block:var(--space-4)}
+</style>

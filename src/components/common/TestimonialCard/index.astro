@@ -1,0 +1,70 @@
+---
+/** TestimonialCard — mobile-first, brand-consistent
+ * Props:
+ *  quote: string              // required testimonial text
+ *  author: string             // required person name
+ *  role?: string              // optional role/title
+ *  avatarSrc?: string         // optional avatar image path
+ *  rating?: number            // optional 0–5 stars
+ *  highlight?: boolean        // optional visual emphasis
+ *  class?: string             // optional extra classes on root
+ */
+
+export interface Props {
+  quote: string;
+  author: string;
+  role?: string;
+  avatarSrc?: string;
+  rating?: number;
+  highlight?: boolean;
+  class?: string;
+}
+
+const {
+  quote,
+  author,
+  role,
+  avatarSrc,
+  rating = 0,
+  highlight = false,
+  class: className = ""
+} = Astro.props as Props;
+
+const safeRating = Math.max(0, Math.min(5, Math.round(rating)));
+---
+
+import "./TestimonialCard.css";
+
+<article class={`testimonial card ${highlight ? "is-highlight" : ""} ${className}`} data-section="testimonial">
+  <figure class="testimonial__figure">
+    {avatarSrc && (
+      <img
+        class="testimonial__avatar"
+        src={avatarSrc}
+        alt={`Avatar of ${author}`}
+        width="64"
+        height="64"
+        loading="lazy"
+        decoding="async"
+      />
+    )}
+
+    <blockquote class="testimonial__quote">
+      <span class="sr-only">Testimonial:</span>
+      “{quote}”
+    </blockquote>
+
+    <figcaption class="testimonial__meta">
+      <span class="testimonial__author">{author}</span>
+      {role && <span class="testimonial__role">{role}</span>}
+    </figcaption>
+
+    {safeRating > 0 && (
+      <div class="testimonial__rating" role="img" aria-label={`${safeRating} out of 5 stars`}>
+        {Array.from({ length: 5 }).map((_, i) => (
+          <span class={`star ${i < safeRating ? "is-filled" : ""}`} aria-hidden="true">★</span>
+        ))}
+      </div>
+    )}
+  </figure>
+</article>

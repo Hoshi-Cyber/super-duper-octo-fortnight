@@ -1,0 +1,112 @@
+---
+// File: src/pages/index.astro
+import BaseLayout from "@/components/layout/BaseLayout.astro";
+import Hero from "@/components/sections/service/Hero/index.astro";
+import FeatureList from "@/components/sections/service/FeatureList/index.astro";
+import TestimonialStrip from "@/components/sections/shared/TestimonialStrip/index.astro";
+import LeadCaptureBanner from "@/components/cta/LeadCaptureBanner/index.astro";
+import StructuredData from "@/components/seo/StructuredData/index.astro";
+import PricingTable from "@/components/plan/PricingTable/index.astro";
+import StatStrip from "@/components/metrics/StatStrip/index.astro";
+import testimonials from "@/data/testimonials.json";
+import site from "@/site.config.json";
+
+const title = "Professional CV Writing Services in Kenya";
+const description =
+  "Get more interviews with ATS-optimized CVs, cover letters and LinkedIn profiles tailored to the Kenyan job market.";
+
+const seo = {
+  canonical: "/", // BaseLayout will render relative in dev, absolute in prod
+  ogImage: "/assets/images/hero.png",
+};
+
+const hero = {
+  eyebrow: "CV Writing Kenya",
+  title,
+  sub: description,
+  image: "/assets/images/hero.png",
+  alt: "Professional CV writing for the Kenyan job market",
+  actions: [{ label: "Get Started", href: "/contact/" }],
+};
+
+const stats = [
+  { value: "1k+", label: "CVs delivered" },
+  { value: "98%", label: "ATS pass rate" },
+  { value: "95%", label: "Client satisfaction" },
+  { value: "72h", label: "Typical turnaround" },
+];
+
+const features = {
+  items: [
+    { title: "1k+ CVs Delivered", body: "Proven throughput for every career level in Kenya." },
+    { title: "95% Satisfaction", body: "Consistent 5★ feedback and repeat engagements." },
+    { title: "98% ATS Pass Rate", body: "Structures and keywords aligned to local ATS." },
+    { title: "CV Writing", body: "Achievement-led CVs tailored to industry and level.", icon: "" },
+    { title: "Cover Letters", body: "Clear narrative that maps your story to role needs.", icon: "" },
+    { title: "LinkedIn Optimization", body: "Profile tuned for recruiter search and brand." },
+  ],
+};
+
+const lead = {
+  title: "Ready to Get Started?",
+  sub: "Choose a plan or speak to a specialist. No hidden fees.",
+  primaryHref: "/contact/",
+  primaryLabel: "Get Started Today",
+};
+
+// Env-aware base for JSON-LD urls
+const isDev = import.meta.env.DEV;
+const siteUrl = isDev ? "" : site.siteUrl;
+
+const orgJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Professional CV Writing Kenya",
+  url: siteUrl || undefined, // omit in dev
+};
+
+const webJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "Professional CV Writing Kenya",
+  url: siteUrl || undefined, // omit in dev
+};
+---
+
+<BaseLayout {title} {description} {seo}>
+  <!-- Hero -->
+  <Hero {...hero} />
+
+  <!-- Key metrics before features -->
+  <section class="section--tight" aria-label="Key metrics">
+    <div class="container">
+      <StatStrip stats={stats} />
+    </div>
+  </section>
+
+  <!-- Services/features -->
+  <FeatureList {...features} />
+
+  <!-- Pricing -->
+  <section class="section" aria-labelledby="pricing-title" id="pricing">
+    <div class="container">
+      <h2 id="pricing-title" class="h2">Transparent Pricing</h2>
+      <p>Our packages deliver exceptional value without hidden fees. Choose the plan that fits your goals.</p>
+      <PricingTable showTitle={false} />
+    </div>
+  </section>
+
+  <!-- Social proof -->
+  <TestimonialStrip {...testimonials} />
+
+  <!-- Lead capture -->
+  <LeadCaptureBanner {...lead} />
+
+  <!-- SEO -->
+  <StructuredData type="Organization" data={orgJsonLd} />
+  <StructuredData type="WebSite" data={webJsonLd} />
+
+  <style>
+    .section--tight { padding-block: clamp(1.25rem, 2vw, 2rem); }
+  </style>
+</BaseLayout>

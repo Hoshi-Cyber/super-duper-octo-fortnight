@@ -1,0 +1,105 @@
+---
+// File: src/components/blog/CollectionSchema/index.astro
+import "./CollectionSchema.css";
+
+/**
+ * Emits JSON-LD for a blog category (CollectionPage) and its items (ItemList).
+ * Non-visual. Guard absolute URL building per Fix Plan 136.1.
+ */
+
+export interface Crumb { name: string; url?: string }
+export interface PageInfo {
+  title: string;
+  url: string;
+  description?: string;
+  totalItems?: number;
+  page?: number;
+  totalPages?: number;
+  breadcrumb?: Crumb[];
+}
+export interface Item {
+  title: string;
+  url: string;
+  image?: string;
+  datePublished?: string;
+  dateModified?: string;
+  authorName?: string;
+  description?: string;
+}
+export interface Props {
+  pageInfo: PageInfo;
+  items: Item[];
+}
+
+const { pageInfo, items } = Astro.props as Props;
+
+/** Safe absolutizer: if Astro.site is set, make absolute; else return input as-is. */
+const site = Astro.site ? Astro.site.toString() : "";
+const abs = (u?: string | null): string | undefined =>
+  u ? (site ? new URL(u, site).toString() : u) : undefined;
+
+const listElements = items.map((it, i) => {
+  const url = abs(it.url);
+  const img = abs(it.image);
+  return {
+    "@type": "ListItem",
+    position: i + 1,
+    ...(url ? { url } : {}),
+    name: it.title,
+    ...(img ? { image: img } : {}),
+  };
+});
+
+const breadcrumbLd =
+  pageInfo.breadcrumb?.length
+    ? {
+        "@type": "BreadcrumbList",
+        itemListElement: pageInfo.breadcrumb.map((c, i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          name: c.name,
+          ...(c.url ? { item: abs(c.url) } : {}),
+        })),
+      }
+    : null;
+
+const collectionPageLd = {
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  name: pageInfo.title,
+  ...(pageInfo.description ? { description: pageInfo.description } : {}),
+  ...(pageInfo.url ? { url: abs(pageInfo.url) } : {}),
+  ...(breadcrumbLd ? { breadcrumb: breadcrumbLd } : {}),
+  isPartOf: {
+    "@type": "WebSite",
+    name: (Astro.site && new URL(site).hostname) || "Website",
+    ...(site ? { url: site } : {}),
+  },
+  ...(pageInfo.page && pageInfo.totalPages
+    ? {
+        pagination: {
+          "@type": "CollectionPage",
+          name: `Page ${pageInfo.page} of ${pageInfo.totalPages}`,
+        },
+      }
+    : {}),
+};
+
+const itemListLd = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  itemListOrder: "https://schema.org/ItemListOrderAscending",
+  numberOfItems: pageInfo.totalItems ?? items.length,
+  itemListElement: listElements,
+};
+---
+
+<!-- Non-visual block that only injects SEO JSON-LD -->
+<div class="collection-schema" aria-hidden="true">
+  <script type="application/ld+json">
+    {JSON.stringify(collectionPageLd)}
+  </script>
+  <script type="application/ld+json">
+    {JSON.stringify(itemListLd)}
+  </script>
+</div>

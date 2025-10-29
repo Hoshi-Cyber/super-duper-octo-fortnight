@@ -1,0 +1,23 @@
+---
+interface Props {
+  src: string;
+  alt: string;
+  width?: number;
+  height?: number;
+  caption?: string;
+}
+const { src, alt, width, height, caption } = Astro.props;
+const sheet = new URL('./ProseImage.css', import.meta.url).toString();
+---
+<link rel="stylesheet" href={sheet} />
+<figure class="ui-prose-image">
+  <img
+    src={src}
+    alt={alt}
+    width={width}
+    height={height}
+    loading="lazy"
+    decoding="async"
+  />
+  {caption && <figcaption class="ui-prose-image__caption">{caption}</figcaption>}
+</figure>

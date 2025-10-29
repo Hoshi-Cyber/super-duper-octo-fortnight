@@ -1,0 +1,76 @@
+/* src/components/blog/LeadMagnetStrip/LeadMagnetStrip.css */
+/* LeadMagnetStrip — mobile-first, token-driven */
+
+.lms {
+  padding-block: var(--space-6);
+  background: color-mix(in oklab, var(--color-primary) 6%, #fff);
+  border-top: 1px solid rgba(17,24,39,.06);
+  border-bottom: 1px solid rgba(17,24,39,.06);
+}
+
+.lms__wrap {
+  display: grid;
+  gap: var(--space-4);
+  align-items: center;
+}
+
+@media (min-width: 768px) {
+  .lms__wrap {
+    grid-template-columns: 1fr auto;
+    gap: var(--space-6);
+  }
+}
+
+.lms__title {
+  margin: 0 0 var(--space-1);
+  font-weight: 800;
+  line-height: 1.2;
+  font-size: clamp(var(--fs-lg), 3.4vw, var(--fs-2xl));
+  color: var(--color-text);
+}
+
+.lms__sub {
+  margin: 0;
+  color: var(--color-muted);
+  max-width: 60ch;
+}
+
+.lms__form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+@media (min-width: 640px) {
+  .lms__form { gap: var(--space-3); }
+}
+
+.lms__input {
+  height: 44px;
+  padding: 0 var(--space-3);
+  border: 1px solid rgba(17,24,39,.12);
+  border-radius: var(--radius-md);
+  background: #fff;
+  color: var(--color-text);
+  font: inherit;
+  min-width: 16rem;
+}
+
+.lms__input:focus-visible {
+  outline: 2px solid transparent;
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-primary) 35%, #fff);
+}
+
+.lms__btn {
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  white-space: nowrap;
+}
+
+.lms__hp {
+  position: absolute !important;
+  left: -9999px !important;
+  width: 1px; height: 1px;
+  opacity: 0;
+}

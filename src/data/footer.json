@@ -1,0 +1,46 @@
+{
+  "social": [
+    { "icon": "linkedin", "href": "https://www.linkedin.com/company/cvwriting-ke" },
+    { "icon": "x-twitter", "href": "https://twitter.com/cvwritingke" },
+    { "icon": "facebook", "href": "https://facebook.com/cvwritingke" }
+  ],
+  "columns": [
+    {
+      "title": "Services",
+      "links": [
+        { "label": "CV Writing", "href": "/services/cv-writing/" },
+        { "label": "Cover Letter", "href": "/services/cover-letter/" },
+        { "label": "LinkedIn Optimization", "href": "/services/linkedin-optimization/" }
+      ]
+    },
+    {
+      "title": "Company",
+      "links": [
+        { "label": "About", "href": "/about/" },
+        { "label": "Process", "href": "/process/" },
+        { "label": "Testimonials", "href": "/testimonials/" },
+        { "label": "Samples", "href": "/samples/" },
+        { "label": "FAQs", "href": "/faq/" }
+      ]
+    },
+    {
+      "title": "Contact",
+      "links": [
+        { "label": "Email", "href": "mailto:hello@cvwriting.co.ke" },
+        { "label": "Phone", "href": "tel:+254712345678" },
+        { "label": "WhatsApp", "href": "https://wa.me/254712345678" },
+        { "label": "Contact Form", "href": "/contact/" }
+      ]
+    },
+    {
+      "title": "Legal",
+      "links": [
+        { "label": "Privacy Policy", "href": "/privacy-policy" },
+        { "label": "Terms of Service", "href": "/terms" },
+        { "label": "Manage Cookies", "href": "/manage-cookies/" },
+        { "label": "Sitemap", "href": "/sitemap.xml" }
+      ]
+    }
+  ],
+  "bottom": []
+}

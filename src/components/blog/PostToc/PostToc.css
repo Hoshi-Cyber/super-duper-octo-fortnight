@@ -1,0 +1,33 @@
+@import "../../../styles/tokens.css";
+@import "../../../styles/typography.css";
+
+/* Scope to post only */
+.post .post__toc {
+  margin: var(--space-8) 0;
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-xs);
+}
+
+.post .post__toc-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: .375rem;
+}
+
+.post .post__toc-item a {
+  text-decoration: none;
+  color: var(--color-text);
+  font-size: var(--fs-sm);
+}
+
+.post .post__toc-item a:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Indentation by depth */
+.post .post__toc-item--d3 { padding-left: .75rem; opacity: .9; }

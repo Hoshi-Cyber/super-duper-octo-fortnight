@@ -1,0 +1,117 @@
+/* CategoryHero — mobile-first, brand tokens
+   FP-111: more vertical padding on all screens; wider mobile-only gutters.
+   Page spacing stays with .stack. */
+
+/* Section wrapper stays neutral; the card holds the visuals */
+.category-hero {
+  padding-block: clamp(var(--space-5), 2.2vw, var(--space-7));
+  background: transparent;
+}
+
+/* Rounded, elevated card with balanced inner padding */
+.category-hero__card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-light);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+
+  /* Increased vertical padding globally.
+     Increased horizontal gutters on mobile first, then normalize on ≥640px. */
+  padding:
+    clamp(var(--space-10), 7vw, var(--space-18))           /* top/bottom */
+    clamp(var(--space-8), 8vw, var(--space-10));           /* left/right (mobile-wider) */
+}
+
+/* Normalize horizontal gutters from tablet up */
+@media (min-width: 640px) {
+  .category-hero__card {
+    padding-inline: clamp(var(--space-7), 6.5vw, var(--space-10));
+  }
+}
+
+/* Extra hard floors for very small screens */
+@media (max-width: 360px) {
+  .category-hero__card {
+    padding: var(--space-10) var(--space-8);
+  }
+}
+
+.category-hero__head {
+  display: grid;
+  gap: var(--space-4);
+  max-width: 72rem;
+  margin-inline: auto;
+}
+
+/* Eyebrow */
+.category-hero__eyebrow {
+  margin: 0;
+  font-size: clamp(.75rem, .22vw + .7rem, .9rem);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--color-muted);
+}
+
+/* Title + dek */
+.category-hero__title {
+  margin: 0;
+  font-size: clamp(var(--fs-2xl), 5vw, var(--fs-4xl));
+  line-height: 1.15;
+  font-weight: 800;
+  color: var(--color-text);
+}
+.category-hero__dek {
+  margin: 0;
+  font-size: var(--fs-lg);
+  color: var(--color-muted);
+  max-width: 60ch;
+}
+
+/* Metrics — smaller, lighter pills with responsive ramp */
+.category-hero__stats {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  font-size: clamp(.75rem, .2vw + .72rem, .875rem);
+}
+.category-hero__stat {
+  display: inline-flex;
+  align-items: center;
+  gap: .45ch;
+  padding: .3rem .6rem;
+  border-radius: 9999px;
+  background: var(--color-light);
+  color: var(--color-muted);
+  border: 1px solid color-mix(in srgb, var(--color-primary) 10%, transparent);
+}
+.category-hero__stat + .category-hero__stat::before { content: none; }
+
+/* On ≥640px, allow pills to breathe a bit more */
+@media (min-width: 640px) {
+  .category-hero__stat { padding: .34rem .65rem; }
+}
+
+/* CTAs: stack on mobile, row on ≥640px */
+.category-hero__ctas {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
+}
+.category-hero__ctas .btn { width: 100%; }
+@media (min-width: 640px) {
+  .category-hero__ctas {
+    grid-auto-flow: column;
+    grid-template-columns: unset;
+    justify-content: start;
+  }
+  .category-hero__ctas .btn { width: auto; }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .category-hero__ctas { transition: none; }
+}

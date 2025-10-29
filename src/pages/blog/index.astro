@@ -1,0 +1,146 @@
+---
+import BaseLayout from "../../components/layout/BaseLayout.astro";
+import BlogHero from "../../components/blog/BlogHero/index.astro";
+import CategoryGrid from "../../components/blog/CategoryGrid/index.astro";
+import PostFeedLatest from "../../components/blog/PostFeedLatest/index.astro";
+import TrendingList from "../../components/blog/TrendingList/index.astro";
+import LeadMagnetStrip from "../../components/blog/LeadMagnetStrip/index.astro";
+import LeadCaptureBanner from "../../components/cta/LeadCaptureBanner/index.astro";
+import { getCollection } from "astro:content";
+
+const slugify = (s: string) =>
+  String(s || "uncategorized")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+
+const all = await getCollection("blog", ({ data }) => !data.draft);
+
+const posts = all
+  .filter((p) => p?.data?.title && p?.data?.date && p?.slug)
+  .map((p) => {
+    const postSlug = p.slug.split("/").pop()!;
+    const categorySlug = slugify(p.data.category ?? "uncategorized");
+    return {
+      title: p.data.title,
+      description: p.data.description,
+      href: `/blog/${categorySlug}/${postSlug}/`,
+      date: new Date(p.data.date),
+      author: p.data.author,
+      tags: p.data.tags ?? [],
+      // Harden cover normalization per Fix Plan 131
+      cover:
+        typeof p.data.cover === "string"
+          ? p.data.cover
+          : (p.data.cover?.src ?? p.data.ogImage ?? null),
+      category: p.data.category,
+      readingTime:
+        p.data.readingTimeMinutes ?? p.data.readingTime ?? undefined,
+    };
+  })
+  .sort((a, b) => b.date.getTime() - a.date.getTime());
+
+const featured = posts[0] ?? null;
+const rest = featured ? posts.slice(1) : [];
+
+/* PostFeedLatest prop shape */
+const feedPosts = rest.map((p) => ({
+  url: p.href,
+  frontmatter: {
+    title: p.title,
+    description: p.description,
+    date: p.date,
+    readingTime: p.readingTime,
+    category: p.category,
+    cover: p.cover ? { src: p.cover, alt: p.title } : undefined,
+  },
+}));
+
+/* TrendingList items */
+const trendingItems = posts.slice(0, 5).map((p) => ({
+  title: p.title,
+  href: p.href,
+  meta:
+    (p.category ? `${p.category} · ` : "") +
+    p.date.toLocaleDateString("en-KE", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    }),
+}));
+
+const categoryCards = [
+  {
+    icon: "📝",
+    title: "CV & Cover Letter Tips",
+    blurb: "Actionable guides for better applications.",
+    href: "/blog/cv-tips/",
+  },
+  {
+    icon: "/assets/icons/linkedin.svg",
+    title: "LinkedIn & Branding",
+    blurb: "Be discoverable and credible.",
+    href: "/blog/linkedin/",
+  },
+  {
+    icon: "💼",
+    title: "Interviews & Offers",
+    blurb: "Prep, strategy, and negotiation.",
+    href: "/blog/career-growth/",
+  },
+  {
+    icon: "📊",
+    title: "Kenya Job Market",
+    blurb: "Local trends and salary intel.",
+    href: "/blog/kenya-market/",
+  },
+];
+---
+
+<BaseLayout title="Blog" description="Insights on ATS, CV writing, and career growth in Kenya">
+  <BlogHero
+    title="Career Insights & Guides"
+    sub="Actionable posts on CVs, cover letters, LinkedIn, and job search."
+    primaryHref="/contact/"
+    primaryLabel="Get Professional CV Help"
+    secondaryHref="/blog/"
+    secondaryLabel="Read Latest"
+    cover={featured?.cover ? { src: featured.cover, alt: featured.title } : null}
+  />
+
+  <CategoryGrid items={categoryCards} />
+
+  <PostFeedLatest
+    posts={feedPosts}
+    pageSize={6}
+    eyebrow="From the blog"
+    title="Latest articles"
+    moreHref="/blog/"
+    moreLabel="View all"
+    moreAriaLabel="View all blog posts"
+    ctaClass="pfl__viewAll"
+  />
+
+  <TrendingList
+    items={trendingItems}
+    eyebrow="Popular this month"
+    title="Trending"
+    limit={5}
+  />
+
+  <LeadMagnetStrip
+    title="Free PDF: Top 10 CV Mistakes in Kenya"
+    sub="Get practical, local fixes that increase interview callbacks."
+    action="/api/subscribe"
+    source="blog_home_leadmagnet"
+    successHref="/thank-you/"
+  />
+
+  <LeadCaptureBanner
+    title="Ready for more interviews?"
+    sub="Get an ATS-optimized CV and LinkedIn that win replies in Kenya’s market."
+    primaryHref="/contact/"
+    primaryLabel="Get Started"
+  />
+</BaseLayout>

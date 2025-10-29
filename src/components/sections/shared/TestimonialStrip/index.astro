@@ -1,0 +1,76 @@
+---
+export interface Testimonial { quote: string; author?: string; role?: string }
+export interface Props {
+  items: Testimonial[]
+  class?: string            // optional extra section class
+  loop?: boolean            // enable seamless infinite carousel on small/medium screens
+  moreHref?: string         // desktop “View more” link
+}
+const {
+  items = [],
+  class: className = "",
+  loop = true,
+  moreHref = "/testimonials/"
+} = Astro.props
+
+import "./TestimonialStrip.css"
+import Button from "../../../cta/Button/index.astro"
+---
+<section
+  class={`section ${className}`.trim()}
+  data-section="testimonials"
+  aria-labelledby="testimonials-title"
+>
+  <div class="container">
+    <h2 id="testimonials-title" class="h2">What clients say</h2>
+
+    {items.length > 0 && (
+      <div class="tscroller" role="region" aria-label="Client testimonials">
+        <div class="tscroller__track">
+          {items.map((t) => (
+            <figure class="tcard" tabindex="0">
+              {/* Quote mark styled via CSS ::before */}
+              <blockquote>{t.quote}</blockquote>
+              {(t.author || t.role) && (
+                <figcaption>
+                  {t.author && <strong>{t.author}</strong>}
+                  {t.role && <span class="tcard__role"> — {t.role}</span>}
+                </figcaption>
+              )}
+            </figure>
+          ))}
+
+          {loop &&
+            items.map((t) => (
+              <figure class="tcard" tabindex="0">
+                <blockquote>{t.quote}</blockquote>
+                {(t.author || t.role) && (
+                  <figcaption>
+                    {t.author && <strong>{t.author}</strong>}
+                    {t.role && <span class="tcard__role"> — {t.role}</span>}
+                  </figcaption>
+                )}
+              </figure>
+            ))}
+        </div>
+      </div>
+    )}
+
+    {/* Desktop-only link (shown via CSS) */}
+    <div class="testimonials__more">
+      <Button
+        href={moreHref}
+        variant="accent"
+        size="md"
+        cta="testimonials:more"
+        ariaLabel="View more testimonials"
+        label="View more testimonials"
+      >
+        View more testimonials
+        <svg slot="icon-right" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+          <path d="M13.172 12 8.222 7.05l1.414-1.414L16 12l-6.364 6.364-1.414-1.414z" fill="currentColor" />
+        </svg>
+      </Button>
+    </div>
+  </div>
+</section>

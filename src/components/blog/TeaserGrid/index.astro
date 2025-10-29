@@ -1,0 +1,85 @@
+---
+import "./TeaserGrid.css";
+
+export type TeaserPost = {
+  title: string;
+  slug: string;               // e.g., "cv-format-kenya-2025"
+  excerpt: string;
+  category?: string;
+  thumbnail?: string;         // absolute or /public path
+  author?: string;
+  date?: string;              // ISO string preferred
+  readingTime?: number;       // minutes
+  alt?: string;               // image alt text; if absent uses title
+};
+
+interface Props {
+  title?: string;
+  eyebrow?: string;
+  posts: TeaserPost[];
+  moreHref?: string;          // e.g., "/blog/"
+  moreLabel?: string;         // default: "View all"
+}
+
+const {
+  title = "Latest articles",
+  eyebrow,
+  posts = [],
+  moreHref = "/blog/",
+  moreLabel = "View all",
+}: Props = Astro.props;
+---
+
+<section class="tgrid" aria-labelledby="tgrid-title" data-section="blog-teasers">
+  <header class="tgrid__header">
+    {eyebrow && <p class="tgrid__eyebrow">{eyebrow}</p>}
+    <h2 id="tgrid-title" class="tgrid__title">{title}</h2>
+  </header>
+
+  {posts.length === 0 ? (
+    <p class="tgrid__empty">Content coming soon.</p>
+  ) : (
+    <div class="tgrid__grid">
+      {posts.map((p) => (
+        <article class="tcard">
+          <a href={`/blog/${p.slug}/`} class="tcard__link">
+            {p.thumbnail && (
+              <img
+                src={p.thumbnail}
+                alt={p.alt ?? p.title}
+                loading="lazy"
+                width="640"
+                height="360"
+                class="tcard__img"
+              />
+            )}
+            <div class="tcard__body">
+              {p.category && <div class="tcard__cat">{p.category}</div>}
+              <h3 class="tcard__title">{p.title}</h3>
+              <p class="tcard__excerpt">{p.excerpt}</p>
+              <div class="tcard__meta">
+                {p.author && <span>{p.author}</span>}
+                {p.date && (
+                  <>
+                    <span aria-hidden="true"> • </span>
+                    <time datetime={p.date}>{p.date}</time>
+                  </>
+                )}
+                {typeof p.readingTime === "number" && (
+                  <>
+                    <span aria-hidden="true"> • </span>
+                    <span>{p.readingTime} min read</span>
+                  </>
+                )}
+              </div>
+            </div>
+          </a>
+        </article>
+      ))}
+    </div>
+  )}
+
+  <footer class="tgrid__footer">
+    <a href={moreHref} class="tgrid__more">{moreLabel}</a>
+  </footer>
+</section>

@@ -1,0 +1,23 @@
+---
+interface Item { label: string; checked?: boolean }
+interface Props { items: Item[] }
+const { items = [] } = Astro.props;
+const sheet = new URL('./Checklist.css', import.meta.url).toString();
+---
+<link rel="stylesheet" href={sheet} />
+<ul class="ui-checklist" role="list">
+  {items.map((it, idx) => (
+    <li class="ui-checklist__item">
+      <label class="ui-checklist__label">
+        <input
+          class="ui-checklist__box"
+          type="checkbox"
+          checked={Boolean(it.checked)}
+          aria-label={it.label}
+        />
+        <span class="ui-checklist__text">{it.label}</span>
+      </label>
+    </li>
+  ))}
+  <slot />
+</ul>

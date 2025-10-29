@@ -1,0 +1,39 @@
+---
+import "./TimelineList.css";
+
+export type TimelineItem = { phase: string; window: string; note?: string };
+
+interface Props {
+  title?: string;
+  eyebrow?: string;
+  items: TimelineItem[];
+}
+
+const {
+  title = "Typical timeline",
+  eyebrow,
+  items = [],
+}: Props = Astro.props;
+---
+
+<section class="tline" aria-labelledby="tline-title" data-section="timeline">
+  <header class="tline__header">
+    {eyebrow && <p class="tline__eyebrow">{eyebrow}</p>}
+    <h2 id="tline-title" class="tline__title">{title}</h2>
+  </header>
+
+  <ol class="tline__list">
+    {items.map((it, i) => (
+      <li class="tline__item">
+        <div class="tline__badge" aria-label={`Step ${i + 1}`}>{i + 1}</div>
+        <div class="tline__content">
+          <div class="tline__row">
+            <h3 class="tline__phase">{it.phase}</h3>
+            <time class="tline__window">{it.window}</time>
+          </div>
+          {it.note && <p class="tline__note">{it.note}</p>}
+        </div>
+      </li>
+    ))}
+  </ol>
+</section>

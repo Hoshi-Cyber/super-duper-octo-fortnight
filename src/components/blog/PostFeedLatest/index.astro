@@ -1,0 +1,152 @@
+---
+// File: src/components/blog/PostFeedLatest/index.astro
+// Implements Fix Plan 141.1: centralized helpers, parent-supplied canonical post URLs.
+
+export interface Cover { src: string; alt?: string; width?: number; height?: number }
+export interface FM {
+  title: string;
+  description?: string;
+  date: string | Date;
+  readingTime?: number;
+  category?: string;
+  cover?: Cover;
+}
+export interface Post { url: string; frontmatter: FM }
+export interface Props {
+  posts: Post[];
+  pageSize?: number;
+  eyebrow?: string;
+  title?: string;
+  moreHref?: string;
+  moreLabel?: string;
+  moreAriaLabel?: string;
+  ctaClass?: string;
+}
+
+import { categorySlug } from "../../../lib/slug";
+
+const {
+  posts = [],
+  pageSize = 6,
+  eyebrow = "From the blog",
+  title = "Latest articles",
+  moreHref = "/blog/",
+  moreLabel = "View all",
+  moreAriaLabel,
+  ctaClass = "pfl__viewAll",
+} = Astro.props as Props;
+
+const fmt = (d: string | Date) =>
+  new Date(d).toLocaleDateString("en-KE", { year: "numeric", month: "short", day: "numeric" });
+
+const catHref = (p: Post) => `/blog/${categorySlug(p.frontmatter?.category || "uncategorized")}/`;
+
+import css from "./PostFeedLatest.css?url";
+---
+<style is:global>
+  @import "../../../styles/tokens.css";
+  @import "../../../styles/typography.css";
+  @import "../../../styles/utilities.css";
+  @import "../../../styles/breakpoints.css";
+</style>
+<link rel="stylesheet" href={css} />
+
+<section class="pfl" aria-label="Latest articles">
+  <div class="container">
+    <header class="pfl__head">
+      {eyebrow && <p class="pfl__eyebrow">{eyebrow}</p>}
+      {title && <h2 class="pfl__title">{title}</h2>}
+    </header>
+
+    <div id="pfl-grid" class="pfl__grid" data-page-size={pageSize}>
+      {posts.map((p, idx) => {
+        const href = p.url; // canonical URL supplied by parent (Fix Plan 141)
+        const categoryLink = catHref(p);
+        const dt = new Date(p.frontmatter.date);
+        const dateIso = isNaN(dt.getTime()) ? undefined : dt.toISOString();
+
+        return (
+          <article
+            class={`pfl__card ${idx >= pageSize ? "is-hidden" : ""}`}
+            data-index={idx}
+            data-cat={(p.frontmatter?.category ?? "").trim() || "uncategorized"}
+          >
+            {p.frontmatter?.cover?.src && (
+              <a href={href} class="pfl__media" aria-label={`Read ${p.frontmatter.title}`}>
+                <img
+                  src={p.frontmatter.cover.src}
+                  alt={p.frontmatter.cover.alt ?? p.frontmatter.title}
+                  width={p.frontmatter.cover.width ?? 640}
+                  height={p.frontmatter.cover.height ?? 360}
+                  loading={idx < 4 ? "eager" : "lazy"}
+                  decoding="async"
+                  sizes="(min-width:1280px) 25vw, (min-width:1024px) 25vw, (min-width:640px) 33vw, 100vw"
+                  fetchpriority={idx < 2 ? "high" : "low"}
+                />
+              </a>
+            )}
+            <div class="pfl__body">
+              {p.frontmatter?.category && (
+                <p class="pfl__cat">
+                  <a href={categoryLink} aria-label={`View ${p.frontmatter.category} posts`}>
+                    {p.frontmatter.category}
+                  </a>
+                </p>
+              )}
+              <h3 class="pfl__cardTitle">
+                <a href={href} class="pfl__link" aria-label={`Read ${p.frontmatter.title}`}>
+                  {p.frontmatter.title}
+                </a>
+              </h3>
+              {p.frontmatter?.description && (
+                <p class="pfl__excerpt clamp-3">{p.frontmatter.description}</p>
+              )}
+              <p class="pfl__meta">
+                <time datetime={dateIso}>{fmt(p.frontmatter.date)}</time>
+                {typeof p.frontmatter?.readingTime === "number" && (
+                  <span aria-hidden="true"> · {p.frontmatter.readingTime} min read</span>
+                )}
+              </p>
+            </div>
+          </article>
+        );
+      })}
+    </div>
+
+    <div class="pfl__actions">
+      {posts.length > pageSize && (
+        <button id="pfl-more" class="btn btn-outline" data-cta="blog-load-more">Load more</button>
+      )}
+      <a
+        href={moreHref}
+        aria-label={moreAriaLabel ?? moreLabel}
+        class={ctaClass}
+        data-cta="blog-view-all"
+      >
+        {moreLabel}
+      </a>
+    </div>
+  </div>
+
+  <script is:inline>
+    (() => {
+      const grid = document.getElementById("pfl-grid");
+      const btn  = document.getElementById("pfl-more");
+      if (!grid) return;
+      const PAGE_SIZE = Number(grid.dataset.pageSize) || 6;
+      let shown = Math.min(PAGE_SIZE, grid.children.length);
+      if (btn) {
+        btn.addEventListener("click", () => {
+          const hidden = Array.from(grid.querySelectorAll(".pfl__card.is-hidden"));
+          const next = hidden.slice(0, PAGE_SIZE);
+          next.forEach((card) => {
+            card.classList.remove("is-hidden");
+            card.style.contentVisibility = "auto";
+          });
+          shown += next.length;
+          if (shown >= grid.children.length) btn.remove();
+        }, { passive: true });
+      }
+    })();
+  </script>
+</section>

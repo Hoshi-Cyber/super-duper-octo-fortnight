@@ -1,0 +1,30 @@
+---
+interface CTA { label: string; url: string; }
+interface PostCTAsProps {
+  primary?: CTA;
+  secondary?: CTA;
+}
+
+const { primary, secondary } = Astro.props as PostCTAsProps;
+const hasAny = Boolean(primary || secondary);
+
+// Colocated CSS
+const sheet = new URL("./PostCTAs.css", import.meta.url).toString();
+---
+{hasAny && (
+  <nav class="post__ctas" aria-label="Post calls to action">
+    <link rel="stylesheet" href={sheet} />
+
+    {primary && (
+      <a class="post__cta post__cta--primary" href={primary.url}>
+        {primary.label}
+      </a>
+    )}
+
+    {secondary && (
+      <a class="post__cta post__cta--secondary" href={secondary.url}>
+        {secondary.label}
+      </a>
+    )}
+  </nav>
+)}

@@ -1,0 +1,119 @@
+---
+import BaseLayout from "../../components/layout/BaseLayout.astro";
+
+const title = "You're in. Check your email.";
+const desc =
+  "We’ve sent the download link and next steps. If it doesn’t arrive in 2–3 minutes, check spam or promotions.";
+---
+
+<style is:global>
+  /* Brand system */
+  @import "../../styles/tokens.css";
+  @import "../../styles/base.css";
+  @import "../../styles/typography.css";
+  @import "../../styles/utilities.css";
+  @import "../../styles/breakpoints.css";
+</style>
+
+<style>
+  /* Structured steps list */
+  .steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    counter-reset: step;
+    display: grid;
+    gap: var(--space-4);
+  }
+  .steps li {
+    position: relative;
+    padding-left: calc(var(--space-6) + var(--space-2));
+  }
+  .steps li::before {
+    counter-increment: step;
+    content: counter(step);
+    position: absolute;
+    left: 0;
+    top: 0.1rem;
+    inline-size: 2rem;
+    block-size: 2rem;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: var(--color-light);
+    color: var(--color-primary);
+    font-weight: 700;
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Subtle card emphasis for the steps box */
+  .card--subtle {
+    background: var(--color-surface);
+    border: 1px solid #eef0f3;
+  }
+
+  /* Outlined secondary button for “Back to home” */
+  .btn-secondary {
+    display: inline-flex;
+    gap: .5rem;
+    align-items: center;
+    border: 1px solid var(--color-primary);
+    color: var(--color-primary);
+    background: transparent;
+    padding: var(--space-3) var(--space-6);
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    line-height: 1.2;
+    transition: background-color .2s ease-in-out, color .2s ease-in-out, border-color .2s ease-in-out;
+  }
+  .btn-secondary:hover,
+  .btn-secondary:focus {
+    background: var(--color-light);
+    border-color: var(--color-primary-hover);
+    color: var(--color-primary-hover);
+    text-decoration: none;
+  }
+  .btn-secondary svg {
+    width: 1.1rem; height: 1.1rem;
+  }
+</style>
+
+<BaseLayout title={title} description={desc} noindex={true}>
+  <main class="container py-8" style="max-width: 720px;">
+    <header class="mb-6">
+      <h1 class="h1">{title}</h1>
+      <p class="text-muted">{desc}</p>
+    </header>
+
+    <section class="card mb-6">
+      <h2 class="h3 mb-4">Download again</h2>
+      <p class="mb-4 text-muted">If you need it now, use the direct link:</p>
+      <p class="mb-0">
+        <a class="btn btn-primary" href="/downloads/leadmagnet.pdf" rel="noopener">Download PDF</a>
+      </p>
+    </section>
+
+    <section class="card card--subtle">
+      <h2 class="h3 mb-4">Next steps</h2>
+      <ol class="steps">
+        <li>Add <strong>hello@cvwriting.co.ke</strong> to your contacts to avoid spam folders.</li>
+        <li>Reply to the email with your CV if you want a quick audit.</li>
+        <li>Prefer WhatsApp? Save <strong>+254 700 000 000</strong> and text “CV Review”.</li>
+      </ol>
+    </section>
+
+    <p class="mt-6">
+      <a class="btn-secondary" href="/" aria-label="Back to home">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10.5 6.75 4.25 13l6.25 6.25M4.5 13H20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Back to home
+      </a>
+    </p>
+  </main>
+
+  <script>
+    // lightweight conversion signal; wire to your analytics
+    window.dispatchEvent(new CustomEvent("leadmagnet_converted", { detail: { source: "thank_you" } }));
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ event: "leadmagnet_converted", source: "thank_you" });
+  </script>
+</BaseLayout>

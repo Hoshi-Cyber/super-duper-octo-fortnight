@@ -1,0 +1,32 @@
+---
+interface PostCoverProps {
+  src: string;
+  alt?: string;
+  width?: number;
+  height?: number;
+  loading?: "eager" | "lazy";
+}
+
+const {
+  src,
+  alt = "",
+  width = 1280,
+  height = 720,
+  loading = "eager",
+} = Astro.props as PostCoverProps;
+
+// Colocated CSS
+const sheet = new URL("./PostCover.css", import.meta.url).toString();
+---
+<figure class="post__cover">
+  <link rel="stylesheet" href={sheet} />
+  <img
+    src={src}
+    alt={alt}
+    width={width}
+    height={height}
+    loading={loading}
+    decoding="async"
+    itemprop="image"
+  />
+</figure>

@@ -1,0 +1,98 @@
+---
+import "./Footer.css";
+import footerData from "../../../data/footer.json";
+const year = new Date().getFullYear();
+
+function isManageCookies(label?: string) {
+  return typeof label === "string" && label.toLowerCase().includes("manage cookies");
+}
+---
+<footer class="footer" role="contentinfo" data-section="footer">
+  <div class="container">
+    <!-- Social -->
+    <div class="footer__head">
+      <nav class="footer__social" aria-label="Social links">
+        {footerData.social?.map((item) => (
+          <a
+            href={item.href}
+            target="_blank"
+            rel="noopener"
+            aria-label={item.name || item.icon}
+            class="sociallink"
+            data-cta={`footer-social-${(item.icon || item.name || "link").toLowerCase()}`}
+          >
+            <span class="sr-only">{item.name || item.icon}</span>
+            <svg class="sociallink__icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" />
+            </svg>
+          </a>
+        ))}
+      </nav>
+    </div>
+
+    <!-- Columns, max 5 links each -->
+    <div class="footer__cols">
+      {footerData.columns?.map((col) => (
+        <section class="footer__col">
+          <h2 class="footer__colTitle">{col.title}</h2>
+          <ul class="footer__links">
+            {col.links?.slice(0, 5).map((link) => {
+              const manage = isManageCookies(link.label);
+              return (
+                <li>
+                  <a
+                    href={manage ? "#" : link.href}
+                    class="footer__link"
+                    data-cta={`footer-${col.title.toLowerCase().replace(/\s+/g, "-")}`}
+                    {...(manage ? { "data-open-cookie-banner": true } : {})}
+                  >
+                    {link.label}
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ))}
+    </div>
+
+    <!-- Bottom bar (data-driven, no duplicates) -->
+    <div class="footer__bottom">
+      <p class="footer__copy">© {year} CV Writing Kenya. All rights reserved.</p>
+      <nav class="footer__legal" aria-label="Legal">
+        {footerData.bottom?.map((item) => {
+          const manage = isManageCookies(item.label);
+          return (
+            <a
+              href={manage ? "#" : item.href}
+              class="footer__link"
+              {...(manage ? { "data-open-cookie-banner": true } : {})}
+            >
+              {item.label}
+            </a>
+          );
+        })}
+      </nav>
+      <p class="footer__credit">
+        Site by
+        <a class="footer__creditLink" href="https://TemplateFleet.com" target="_blank" rel="noopener"
+          >Template Fleet Sites</a
+        >
+      </p>
+    </div>
+  </div>
+
+  <!-- Manage Cookies hook -->
+  <script is:inline>
+    document.addEventListener(
+      "click",
+      function (e) {
+        var el = e.target && (e.target.closest && e.target.closest("[data-open-cookie-banner]"));
+        if (!el) return;
+        e.preventDefault();
+        if (typeof window.openCookieBanner === "function") window.openCookieBanner();
+      },
+      { passive: false }
+    );
+  </script>
+</footer>

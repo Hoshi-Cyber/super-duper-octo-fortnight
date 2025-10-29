@@ -1,0 +1,31 @@
+@import "../../../styles/tokens.css";
+@import "../../../styles/typography.css";
+
+.ui-checklist {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-4) 0;
+  padding: 0;
+  list-style: none;
+}
+.ui-checklist__item { margin: 0; }
+
+.ui-checklist__label {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: var(--space-2);
+}
+
+.ui-checklist__box {
+  inline-size: 1.125rem;
+  block-size: 1.125rem;
+  margin: 0;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid var(--border-1, var(--color-border-1));
+  accent-color: var(--brand-6, var(--color-accent));
+}
+
+.ui-checklist__text {
+  font: var(--font-body, 400 1rem/1.6 var(--font-sans));
+}

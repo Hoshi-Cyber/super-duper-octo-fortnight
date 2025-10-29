@@ -1,0 +1,129 @@
+/* src/components/blog/RelatedCategories/RelatedCategories.css
+   RelatedCategories — high-contrast branded chips
+   FP-114: unify headings via .section-title, use compact variant to tighten padding near footer.
+*/
+
+/* =========================
+   Core variables
+   ========================= */
+.rc {
+  /* Internal padding; outer separation handled by page stack utilities */
+  --rc-pad-y: clamp(var(--space-6), 3vw, var(--space-10));
+  --rc-pad-x: var(--space-4);
+  --rc-gap: var(--space-3);
+
+  /* Pill sizing */
+  --rc-pill-py: .55rem;
+  --rc-pill-px: 1rem;
+  --rc-radius: var(--radius-lg);
+
+  /* Section visuals */
+  --rc-border: 1px solid var(--color-light);
+  --rc-bg: var(--color-surface);
+
+  /* Pill visuals */
+  --rc-pill-bg: #fff;
+  --rc-pill-text: var(--color-primary);
+  --rc-pill-text-active: #fff;
+
+  /* Branded outlines and states */
+  --rc-ring: var(--color-primary);
+  --rc-ring-alpha: 28%;
+  --rc-hover-bg: var(--color-light-alt);
+}
+
+/* Section (no margins; plays nicely inside .stack) */
+.rc {
+  border-top: var(--rc-border);
+  padding-block: var(--rc-pad-y);
+  padding-inline: var(--rc-pad-x);
+  background: var(--rc-bg);
+}
+
+/* Title (unified with global section-title) */
+.rc .section-title { margin: 0 0 var(--space-4); }
+
+/* List */
+.rc__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--rc-gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Pill link — branded outline + subtle elevation */
+.rc__link {
+  display: inline-flex;
+  align-items: center;
+  gap: .5ch;
+  padding: var(--rc-pill-py) var(--rc-pill-px);
+  border-radius: var(--rc-radius);
+  background: var(--rc-pill-bg);
+  color: var(--rc-pill-text);
+  font-size: var(--fs-base);
+  font-weight: 600;
+  text-decoration: none;
+  line-height: 1.25;
+  border: 1px solid transparent;
+  box-shadow:
+    var(--shadow-sm),
+    inset 0 0 0 2px color-mix(in srgb, var(--rc-ring) var(--rc-ring-alpha), transparent);
+  transition:
+    background-color .15s ease,
+    box-shadow .15s ease,
+    color .15s ease;
+}
+
+@supports not (color-mix(in srgb, black, white)) {
+  .rc__link { border-color: var(--rc-ring); box-shadow: var(--shadow-sm); }
+}
+
+@media (hover:hover) {
+  .rc__link:hover {
+    background: #fff;
+    box-shadow:
+      var(--shadow-sm),
+      inset 0 0 0 2px var(--rc-ring);
+    text-decoration: none;
+  }
+}
+
+.rc__link:focus-visible {
+  outline: 2px solid var(--rc-ring);
+  outline-offset: 2px;
+}
+
+/* Active/current state — solid primary chip */
+.rc__link[aria-current="true"],
+.rc__link--solid {
+  background: var(--rc-ring);
+  color: var(--rc-pill-text-active);
+  box-shadow: var(--shadow-sm), inset 0 0 0 2px var(--rc-ring);
+}
+
+/* Ghost variant (secondary style) */
+.rc__link--ghost {
+  background: transparent;
+  color: var(--color-primary);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--rc-ring) 20%, transparent);
+}
+
+/* Modifiers */
+.rc.rc--compact {
+  --rc-pad-y: clamp(var(--space-4), 2.2vw, var(--space-6));
+  --rc-gap: var(--space-2);
+  --rc-pill-py: .45rem;
+  --rc-pill-px: .85rem;
+  --rc-radius: 9999px;
+}
+/* Tighter title spacing in compact mode */
+.rc.rc--compact .section-title { margin-bottom: var(--space-3); }
+
+/* Reduced motion + forced colors */
+@media (prefers-reduced-motion: reduce) { .rc__link { transition: none; } }
+@media (forced-colors: active) {
+  .rc__link { border: 1px solid CanvasText !important; box-shadow: none !important; }
+  .rc__link:focus-visible { outline-color: Highlight; }
+}

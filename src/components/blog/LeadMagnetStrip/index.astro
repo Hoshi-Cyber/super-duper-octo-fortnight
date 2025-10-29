@@ -1,0 +1,80 @@
+---
+// src/components/blog/LeadMagnetStrip/index.astro
+/**
+ * LeadMagnetStrip — free PDF/email capture.
+ * Props:
+ *  - title: string
+ *  - sub?: string
+ *  - action?: string           // form action URL
+ *  - method?: "get" | "post"   // default "post"
+ *  - source?: string           // hidden source tag
+ *  - successHref?: string      // optional redirect after submit (handled server-side)
+ */
+
+export interface Props {
+  title: string;
+  sub?: string;
+  action?: string;
+  method?: "get" | "post";
+  source?: string;
+  successHref?: string;
+}
+const {
+  title,
+  sub = "Get practical, local advice that wins interviews.",
+  action = "/api/subscribe",
+  method = "post",
+  source = "blog_leadmagnet",
+  successHref
+} = Astro.props as Props;
+
+import css from "./LeadMagnetStrip.css?url";
+---
+
+<style is:global>
+  @import "../../../styles/tokens.css";
+  @import "../../../styles/typography.css";
+  @import "../../../styles/utilities.css";
+  @import "../../../styles/breakpoints.css";
+</style>
+<link rel="stylesheet" href={css} />
+
+<section class="lms" aria-label="Lead magnet">
+  <div class="container lms__wrap">
+    <div class="lms__copy">
+      <h2 class="lms__title">{title}</h2>
+      {sub && <p class="lms__sub">{sub}</p>}
+    </div>
+
+    <form
+      class="lms__form"
+      action={action}
+      method={method}
+      onsubmit="window.dispatchEvent(new CustomEvent('leadmagnet_submit',{detail:{source:'blog'}}))"
+      novalidate
+    >
+      <label for="lms-email" class="sr-only">Email</label>
+      <input
+        id="lms-email"
+        class="lms__input"
+        type="email"
+        name="email"
+        placeholder="you@example.com"
+        required
+        autocomplete="email"
+        autocapitalize="none"
+        spellcheck="false"
+        inputmode="email"
+      />
+      <input type="hidden" name="source" value={source} />
+      {successHref && <input type="hidden" name="success" value={successHref} />}
+
+      <!-- honeypot -->
+      <input type="text" name="company" tabindex="-1" autocomplete="off" class="lms__hp" aria-hidden="true" />
+
+      <button class="lms__btn btn btn-primary" type="submit" data-cta="leadmagnet-submit" aria-label="Get the PDF">
+        Get the PDF
+      </button>
+    </form>
+  </div>
+</section>

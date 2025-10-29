@@ -1,0 +1,215 @@
+---
+import navItems from "../../../data/nav.json";
+import "./Nav.css";
+import { slug } from "@/utils/slug";
+
+/** Nav — mobile-first, accessible (Fix Plan 64 + Fix Plan 128) */
+export interface Props { class?: string }
+const { class: className = "" } = Astro.props as Props;
+
+const cta = navItems.find((i: any) => i.cta);
+const main = navItems.filter((i: any) => !i.cta);
+
+/** Canonicalize blog links and enforce slug rules */
+const normalizeHref = (href: string) => {
+  if (!href) return href;
+  try {
+    const site = (Astro.site && Astro.site.toString()) || "/";
+    const u = new URL(href, site);
+    let p = u.pathname.replace(/\/{2,}/g, "/");
+
+    // /blog/category/<cat>/ → /blog/<slug>/
+    const mCat = p.match(/^\/blog\/category\/([^/]+)\/?$/);
+    if (mCat) {
+      p = `/blog/${slug(decodeURIComponent(mCat[1]))}/`;
+    } else {
+      // /blog/tag/<tag>/ → /blog/tag/<slug>/
+      const mTag = p.match(/^\/blog\/tag\/([^/]+)\/?$/);
+      if (mTag) {
+        p = `/blog/tag/${slug(decodeURIComponent(mTag[1]))}/`;
+      }
+    }
+
+    // Ensure trailing slash on /blog paths
+    if (/^\/blog(\/.*)?$/.test(p) && !p.endsWith("/")) p = p + "/";
+
+    u.pathname = p;
+    u.search = "";
+    u.hash = "";
+    return u.toString().replace(site, site.endsWith("/") ? site : site + "");
+  } catch {
+    return href;
+  }
+};
+---
+<header class={`nav sticky top-0 z-50 ${className}`.trim()} role="banner" data-section="nav">
+  <div class="nav__frame">
+    <div class="container nav__bar">
+      <!-- Brand: icon + wordmark -->
+      <a href="/" class="nav__brand" aria-label="CVWriting.co.ke home" data-cta="brand">
+        <img class="nav__brandIcon" src="/assets/logos/favicon-32.png" width="28" height="28" alt="" decoding="async" fetchpriority="high" />
+        <img class="nav__brandWordmark" src="/assets/logos/logo-wordmark.svg" alt="CVWriting.co.ke" decoding="async" />
+        <span class="sr-only">CVWriting.co.ke</span>
+      </a>
+
+      <!-- Desktop nav -->
+      <nav class="nav__primary" aria-label="Main">
+        <ul class="nav__list" role="menubar">
+          {main.map((item: any) => (
+            !item.children ? (
+              <li class="nav__item" role="none">
+                <a href={normalizeHref(item.href)} role="menuitem" class="nav__link" data-cta={`nav-${item.label.toLowerCase()}`}>
+                  {item.label}
+                </a>
+              </li>
+            ) : (
+              <li class="nav__item nav__item--hasChildren" role="none">
+                <button
+                  class="nav__link nav__disclosure"
+                  aria-haspopup="true"
+                  aria-expanded="false"
+                  aria-controls={`submenu-${item.label.toLowerCase().replace(/\s+/g, "-")}`}
+                  data-cta={`nav-${item.label.toLowerCase()}`}
+                >
+                  {item.label}
+                  <span class="nav__chev" aria-hidden="true">▾</span>
+                </button>
+                <ul
+                  id={`submenu-${item.label.toLowerCase().replace(/\s+/g, "-")}`}
+                  class="nav__submenu"
+                  role="menu"
+                >
+                  {item.children.map((child: any) => (
+                    <li role="none">
+                      <a
+                        href={normalizeHref(child.href)}
+                        role="menuitem"
+                        class="nav__sublink"
+                        data-cta={`nav-${item.label.toLowerCase()}-${child.label.toLowerCase()}`}
+                      >
+                        {child.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            )
+          ))}
+        </ul>
+      </nav>
+
+      <!-- Desktop CTA (hidden on mobile via CSS) -->
+      {cta && (
+        <a href={normalizeHref(cta.href)} class="btn btn-primary nav__cta" data-cta="nav-cta">
+          <span class="btn__inner"><span class="btn__label">{cta.label}</span></span>
+        </a>
+      )}
+
+      <!-- Mobile toggle -->
+      <button
+        class="nav__toggle"
+        id="nav-toggle"
+        aria-label="Open menu"
+        aria-controls="nav-drawer"
+        aria-expanded="false"
+        data-cta="nav-toggle"
+      >
+        <span class="nav__toggleBar" aria-hidden="true"></span>
+        <span class="nav__toggleBar" aria-hidden="true"></span>
+        <span class="nav__toggleBar" aria-hidden="true"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile scrim -->
+  <div id="nav-scrim" class="nav__scrim" hidden></div>
+
+  <!-- Mobile drawer -->
+  <nav id="nav-drawer" class="nav__drawer" aria-label="Mobile" aria-modal="true" role="dialog">
+    <button class="nav__close" id="nav-close" aria-label="Close menu">✕</button>
+    <ul class="nav__drawerList">
+      {main.map((item: any) => (
+        !item.children ? (
+          <li>
+            <a href={normalizeHref(item.href)} class="nav__drawerLink" data-cta={`mnav-${item.label.toLowerCase()}`}>{item.label}</a>
+          </li>
+        ) : (
+          <li>
+            <details class="nav__details">
+              <summary class="nav__summary">{item.label}</summary>
+              <ul class="nav__drawerSub">
+                {item.children.map((child: any) => (
+                  <li>
+                    <a
+                      href={normalizeHref(child.href)}
+                      class="nav__drawerSublink"
+                      data-cta={`mnav-${item.label.toLowerCase()}-${child.label.toLowerCase()}`}
+                    >
+                      {child.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          </li>
+        )
+      ))}
+      {cta && (
+        <li class="nav__drawerCta">
+          <a href={normalizeHref(cta.href)} class="btn btn-primary" data-cta="mnav-cta">
+            <span class="btn__inner"><span class="btn__label">{cta.label}</span></span>
+          </a>
+        </li>
+      )}
+    </ul>
+  </nav>
+
+  <script is:inline>
+    const root = document.currentScript.closest('.nav');
+    const toggle = root.querySelector('#nav-toggle');
+    const drawer = root.querySelector('#nav-drawer');
+    const scrim  = root.querySelector('#nav-scrim');
+    const closeBtn = root.querySelector('#nav-close');
+    const links = drawer.querySelectorAll('a');
+
+    function setExpanded(v) {
+      toggle.setAttribute('aria-expanded', String(v));
+      drawer.classList.toggle('is-open', v);
+      document.documentElement.classList.toggle('no-scroll', v);
+      if (scrim) scrim.hidden = !v;
+    }
+
+    toggle.addEventListener('click', () => {
+      const expanded = toggle.getAttribute('aria-expanded') === 'true';
+      setExpanded(!expanded);
+    });
+
+    closeBtn.addEventListener('click', () => setExpanded(false));
+    if (scrim) scrim.addEventListener('click', () => setExpanded(false));
+
+    // Close when following a link
+    links.forEach(a => a.addEventListener('click', () => setExpanded(false)));
+
+    // ESC to close
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') setExpanded(false);
+    }, { passive: true });
+
+    // Desktop submenu disclosure
+    const disclosures = root.querySelectorAll('.nav__disclosure');
+    disclosures.forEach(btn => {
+      const item = btn.closest('.nav__item--hasChildren');
+      btn.addEventListener('click', () => {
+        const open = btn.getAttribute('aria-expanded') === 'true';
+        btn.setAttribute('aria-expanded', String(!open));
+        item.classList.toggle('is-open', !open);
+      });
+      item.addEventListener('focusout', (e) => {
+        if (!item.contains(e.relatedTarget)) {
+          btn.setAttribute('aria-expanded', 'false');
+          item.classList.remove('is-open');
+        }
+      });
+    });
+  </script>
+</header>

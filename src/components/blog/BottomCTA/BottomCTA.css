@@ -1,0 +1,73 @@
+/* src/components/blog/BottomCTA/BottomCTA.css */
+/* BottomCTA — mobile-first, token-driven. Zero CLS, fast paint. */
+
+.bcta {
+  padding-block: var(--space-8);
+  background: color-mix(in oklab, var(--color-primary) 6%, #fff);
+  border-top: 1px solid rgba(17,24,39,.06);
+  contain: content;
+}
+
+@supports not (background: color-mix(in oklab, white 50%, black)) {
+  /* Fallback if color-mix is unsupported */
+  .bcta { background: var(--color-surface, #f8fafc); }
+}
+
+@media (min-width: 768px) { .bcta { padding-block: var(--space-10); } }
+@media (min-width: 1024px) { .bcta { padding-block: var(--space-12); } }
+
+.bcta__wrap {
+  display: grid;
+  gap: var(--space-4);
+  align-items: center;
+  content-visibility: auto;
+  contain-intrinsic-size: 200px;
+}
+
+@media (min-width: 768px) {
+  .bcta__wrap {
+    grid-template-columns: 1fr auto;
+    gap: var(--space-6);
+  }
+}
+
+.bcta__title {
+  margin: 0 0 var(--space-1);
+  font-weight: 800;
+  line-height: 1.2;
+  font-size: clamp(var(--fs-xl), 3.2vw, var(--fs-3xl));
+  color: var(--color-text);
+}
+
+.bcta__sub {
+  margin: 0;
+  color: var(--color-muted);
+  max-width: 60ch;
+}
+
+.bcta__actions {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.bcta__btn {
+  min-height: 44px; /* a11y target */
+  white-space: nowrap;
+}
+
+/* Focus visible adopts global .btn rings; add fallback */
+.bcta__btn:focus-visible {
+  outline: 2px solid transparent;
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-primary) 40%, #fff);
+  border-radius: var(--radius-md);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .bcta, .bcta__btn { transition: none; }
+}
+
+/* Print */
+@media print {
+  .bcta { background: #fff; border: 0; padding-block: var(--space-4); }
+}

@@ -1,0 +1,36 @@
+---
+export interface Props {
+  title: string
+  sub?: string
+  primaryHref: string
+  primaryLabel: string
+}
+const { title, sub, primaryHref, primaryLabel } = Astro.props
+import './LeadCaptureBanner.css'
+---
+
+<aside data-section="lead-cta" aria-labelledby="lead-cta-title">
+  <div class="container">
+    <div class="lead">
+      <div class="lead__inner">
+        <div class="lead__body">
+          <h2 id="lead-cta-title" class="lead__title">{title}</h2>
+          {sub && <p class="lead__sub">{sub}</p>}
+        </div>
+
+        <div class="lead__actions">
+          <a
+            href={primaryHref}
+            class="btn btn-primary btn-md"
+            data-cta="lead-banner:primary"
+            aria-label={primaryLabel}
+          >
+            <span class="btn__inner">
+              <span class="btn__label">{primaryLabel}</span>
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</aside>

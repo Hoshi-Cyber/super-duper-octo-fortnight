@@ -1,0 +1,36 @@
+[
+  {
+    "label": "Home",
+    "href": "/"
+  },
+  {
+    "label": "Services",
+    "href": "/services/",
+    "children": [
+      { "label": "CV Writing", "href": "/services/cv-writing/" },
+      { "label": "Cover Letter", "href": "/services/cover-letter/" },
+      { "label": "LinkedIn Optimization", "href": "/services/linkedin-optimization/" }
+    ]
+  },
+  {
+    "label": "Pricing",
+    "href": "/pricing/"
+  },
+  {
+    "label": "Process",
+    "href": "/process/"
+  },
+  {
+    "label": "Samples",
+    "href": "/samples/"
+  },
+  {
+    "label": "Blog",
+    "href": "/blog/"
+  },
+  {
+    "label": "Get Started",
+    "href": "/contact/",
+    "cta": true
+  }
+]

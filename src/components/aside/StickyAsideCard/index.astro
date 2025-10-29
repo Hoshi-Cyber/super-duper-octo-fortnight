@@ -1,0 +1,57 @@
+---
+/**
+ * StickyAsideCard — mobile-first sticky helper for service pages
+ * Single-CTA version
+ */
+import Button from "../../cta/Button/index.astro";
+import "./StickyAsideCard.css"; // ensure bundling
+
+export interface Props {
+  eyebrow?: string;
+  title: string;
+  sub?: string;
+  primaryHref: string;
+  primaryLabel: string;
+  ctaId?: string;
+  top?: string;     // CSS length; default 6rem
+  class?: string;
+}
+
+const {
+  eyebrow,
+  title,
+  sub,
+  primaryHref,
+  primaryLabel,
+  ctaId = "aside:primary",
+  top = "6rem",
+  class: className = ""
+} = Astro.props as Props;
+---
+
+<aside
+  class={`saside ${className}`.trim()}
+  data-aside="sticky-card"
+  style={`--stick-top:${top}`}
+  aria-labelledby="aside-title"
+>
+  <div class="saside__card">
+    <header class="saside__head">
+      {eyebrow && <p class="saside__eyebrow">{eyebrow}</p>}
+      <h3 id="aside-title" class="saside__title">{title}</h3>
+      {sub && <p class="saside__sub">{sub}</p>}
+    </header>
+
+    <div class="saside__actions">
+      <Button
+        href={primaryHref}
+        variant="accent"
+        size="sm"
+        cta={ctaId}
+        ariaLabel={primaryLabel}
+        class="saside__btn"
+        label={primaryLabel}
+      />
+    </div>
+  </div>
+</aside>

@@ -1,0 +1,42 @@
+---
+/* src/components/blog/BottomCTA/index.astro */
+export interface Props {
+  title: string;
+  sub?: string;
+  href: string;
+  label: string;
+}
+
+const { title, sub = "ATS-optimized CVs, cover letters, and LinkedIn profiles.", href, label } = Astro.props as Props;
+
+// static CSS import
+import css from "./BottomCTA.css?url";
+---
+
+<style is:global>
+  @import "../../../styles/tokens.css";
+  @import "../../../styles/typography.css";
+  @import "../../../styles/utilities.css";
+  @import "../../../styles/breakpoints.css";
+</style>
+<link rel="stylesheet" href={css} />
+
+<section class="bcta" data-section="bottom-cta" aria-label="Get started">
+  <div class="container bcta__wrap">
+    <div class="bcta__copy">
+      <h2 class="bcta__title">{title}</h2>
+      {sub && <p class="bcta__sub">{sub}</p>}
+    </div>
+
+    <div class="bcta__actions">
+      <a
+        href={href}
+        class="btn btn-primary bcta__btn"
+        data-cta="bottom-cta-primary"
+        aria-label={`${label}: ${title}`}
+      >
+        {label}
+      </a>
+    </div>
+  </div>
+</section>

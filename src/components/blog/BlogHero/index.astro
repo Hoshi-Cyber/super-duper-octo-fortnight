@@ -1,0 +1,77 @@
+---
+// src/components/blog/BlogHero/index.astro
+
+/**
+ * BlogHero — mobile-first hero with dual CTAs.
+ * Props:
+ *  - title: string
+ *  - sub?: string
+ *  - primaryHref?: string
+ *  - primaryLabel?: string
+ *  - secondaryHref?: string
+ *  - secondaryLabel?: string
+ *  - cover?: { src: string; alt?: string; width?: number; height?: number } | null
+ */
+
+export interface Cover { src: string; alt?: string; width?: number; height?: number; }
+export interface Props {
+  title: string;
+  sub?: string;
+  primaryHref?: string;
+  primaryLabel?: string;
+  secondaryHref?: string;
+  secondaryLabel?: string;
+  cover?: Cover | null;
+}
+
+const {
+  title,
+  sub = "",
+  primaryHref = "/contact/",
+  primaryLabel = "Get Professional CV Help",
+  secondaryHref = "/blog/",
+  secondaryLabel = "Read Latest",
+  cover = null,
+} = Astro.props as Props;
+
+import css from "./BlogHero.css?url"; // Fix Plan 95
+---
+
+<style is:global>
+  @import "../../../styles/tokens.css";
+  @import "../../../styles/typography.css";
+  @import "../../../styles/utilities.css";
+  @import "../../../styles/breakpoints.css";
+</style>
+<link rel="stylesheet" href={css} />
+
+<section class="bloghero" data-section="blog-hero" aria-label="Blog hero">
+  <div class="container bloghero__wrap">
+    <div class="bloghero__copy">
+      <h1 class="bloghero__title h1">{title}</h1>
+      {sub && <p class="bloghero__sub">{sub}</p>}
+
+      <div class="bloghero__ctas">
+        <a href={primaryHref} class="btn btn-primary" data-cta="bloghero-primary">
+          {primaryLabel}
+        </a>
+        <a href={secondaryHref} class="btn btn-accent" data-cta="bloghero-secondary">
+          {secondaryLabel}
+        </a>
+      </div>
+    </div>
+
+    {cover?.src && (
+      <figure class="bloghero__media" aria-hidden="true">
+        <img
+          src={cover.src}
+          alt={cover.alt ?? ""}
+          width={cover.width ?? 960}
+          height={cover.height ?? 720}
+          loading="eager"
+          decoding="async"
+        />
+      </figure>
+    )}
+  </div>
+</section>

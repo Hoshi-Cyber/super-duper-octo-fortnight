@@ -1,0 +1,140 @@
+---
+/** ContactForm — mobile-first, brand-consistent, Fix Plan 62
+ * Props:
+ *  action?: string                     // form endpoint (defaults to Formspree)
+ *  method?: 'POST' | 'GET'             // default 'POST'
+ *  whatsappHref?: string               // fallback rapid contact CTA
+ *  packageParam?: string               // query param name to capture (default 'package')
+ *  showFile?: boolean                  // toggle CV upload field
+ *  accept?: string                     // file accept list
+ *  class?: string                      // extra classes on root
+ */
+
+export interface Props {
+  action?: string;
+  method?: 'POST' | 'GET';
+  whatsappHref?: string;
+  packageParam?: string;
+  showFile?: boolean;
+  accept?: string;
+  class?: string;
+}
+
+const {
+  action = 'https://formspree.io/f/mayvdvbg',
+  method = 'POST',
+  whatsappHref = 'https://wa.me/254712345678',
+  packageParam = 'package',
+  showFile = true,
+  accept = '.pdf,.doc,.docx,.rtf',
+  class: className = ''
+} = Astro.props as Props;
+
+const pkg = Astro.url?.searchParams?.get(packageParam) ?? '';
+---
+
+import "./ContactForm.css";
+
+<form
+  class={`contactform ${className}`.trim()}
+  data-section="contactform"
+  name="contact"
+  action={action}
+  method={method}
+  enctype="multipart/form-data"
+  autocomplete="on"
+>
+  <!-- spam honeypot -->
+  <input type="text" name="website" class="hp" tabindex="-1" aria-hidden="true" />
+
+  <div class="contactform__grid">
+    <div class="field">
+      <label for="cf-name" class="label">
+        Full Name <span class="req" aria-hidden="true">*</span>
+      </label>
+      <input
+        id="cf-name"
+        name="name"
+        type="text"
+        required
+        autocomplete="name"
+        class="input"
+        aria-required="true"
+      />
+    </div>
+
+    <div class="field">
+      <label for="cf-email" class="label">
+        Email or Phone <span class="req" aria-hidden="true">*</span>
+      </label>
+      <input
+        id="cf-email"
+        name="email"
+        type="text"
+        inputmode="email"
+        autocomplete="email"
+        required
+        class="input"
+        aria-required="true"
+      />
+    </div>
+
+    <div class="field">
+      <label for="cf-role" class="label">
+        Career Stage <span class="req" aria-hidden="true">*</span>
+      </label>
+      <select id="cf-role" name="role" required class="select" aria-required="true">
+        <option value="">Select…</option>
+        <option value="student">Student/Intern</option>
+        <option value="entry">Entry-level</option>
+        <option value="mid">Mid-career</option>
+        <option value="senior">Senior/Executive</option>
+      </select>
+    </div>
+
+    <div class="field field--full">
+      <label for="cf-goals" class="label">What are your goals?</label>
+      <textarea
+        id="cf-goals"
+        name="goals"
+        rows="4"
+        class="textarea"
+        aria-describedby="cf-goals-help"
+      ></textarea>
+      <p id="cf-goals-help" class="help">Share target roles, industries, or deadlines.</p>
+    </div>
+
+    {showFile && (
+      <div class="field field--full">
+        <label for="cf-file" class="label">Upload your current CV (optional)</label>
+        <input
+          id="cf-file"
+          name="file"
+          type="file"
+          class="file"
+          accept={accept}
+        />
+        <p class="help">Accepted: PDF, DOC, DOCX, RTF.</p>
+      </div>
+    )}
+  </div>
+
+  <input type="hidden" name={packageParam} value={pkg} />
+
+  <div class="contactform__actions">
+    <button type="submit" class="btn btn-primary" data-cta="contact-submit">
+      <span class="btn__inner"><span class="btn__label">Send Inquiry</span></span>
+    </button>
+
+    <a
+      href={whatsappHref}
+      class="btn btn-accent"
+      target="_blank"
+      rel="noopener"
+      data-cta="contact-whatsapp"
+      aria-label="Chat via WhatsApp"
+    >
+      <span class="btn__inner"><span class="btn__label">Chat via WhatsApp</span></span>
+    </a>
+  </div>
+</form>

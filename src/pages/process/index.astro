@@ -1,0 +1,89 @@
+---
+// src/pages/process/index.astro
+import BaseLayout from "../../components/layout/BaseLayout.astro";
+import Steps from "../../components/common/Steps/index.astro";
+import DeliverablesList from "../../components/lists/DeliverablesList/index.astro";
+import TimelineList from "../../components/timeline/TimelineList/index.astro";
+import TeaserGrid from "../../components/blog/TeaserGrid/index.astro";
+import LeadCaptureBanner from "../../components/cta/LeadCaptureBanner/index.astro";
+// import TrustBar from "../../components/socialproof/TrustBar/index.astro";
+
+import processPage from "../../data/pages/process";
+
+const { title, description, seo, intro, steps, deliverables, timeline, cta } =
+  processPage;
+
+// Populate when blog wiring is ready. Rendering is unconditional so the section is visible.
+const latest3 = [
+  // Example posts to verify layout; replace with real data or remove.
+  // {
+  //   title: "CV format that passes ATS in Kenya (2025)",
+  //   slug: "cv-format-kenya-2025",
+  //   excerpt: "A concise structure that beats screening bots and pleases hiring managers.",
+  //   category: "CV & Cover Letter Tips",
+  //   thumbnail: "/images/blog/cv-format-2025.jpg",
+  //   author: "Editorial Team",
+  //   date: "2025-10-10",
+  //   readingTime: 6,
+  // },
+];
+const showTrust = false;
+---
+
+<BaseLayout {title} {description} {seo}>
+  <!-- Header -->
+  <section class="container py-8">
+    <h1>How We Work</h1>
+    <p>{intro}</p>
+  </section>
+
+  <!-- Process stepper (component applies its own .container) -->
+  <section aria-label="Process steps" class="mt-8">
+    <h2 class="sr-only">Our Process</h2>
+    <Steps steps={steps} />
+  </section>
+
+  <!-- Proof strip (enable when you have real items) -->
+  {showTrust && (
+    <section class="container mt-10" aria-label="Social proof">
+      <TrustBar variant="compact" />
+    </section>
+  )}
+
+  <!-- Deliverables + Timeline -->
+  <section class="container mt-12" aria-label="What you receive and timeline">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <DeliverablesList
+        eyebrow="Included in every package"
+        title="What you receive"
+        items={deliverables}
+      />
+      <TimelineList
+        eyebrow="Fast and predictable"
+        title="Typical timeline"
+        items={timeline}
+      />
+    </div>
+  </section>
+
+  <!-- Blog teaser (always render; TeaserGrid handles empty state) -->
+  <section class="container mt-12" aria-label="Latest articles">
+    <TeaserGrid
+      eyebrow="From the blog"
+      title="Latest articles"
+      posts={latest3}
+      moreHref="/blog/"
+      moreLabel="View all"
+    />
+  </section>
+
+  <!-- Bottom CTA -->
+  <section class="container mt-12" aria-label="Call to action">
+    <LeadCaptureBanner
+      title={cta.title}
+      sub={cta.sub}
+      primaryHref={cta.primaryHref}
+      primaryLabel={cta.primaryLabel}
+    />
+  </section>
+</BaseLayout>

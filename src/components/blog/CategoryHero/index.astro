@@ -1,0 +1,79 @@
+---
+import "./CategoryHero.css";
+
+export interface Cta { href: string; label: string }
+export interface Stats {
+  postCount?: number;
+  lastUpdated?: string | Date;
+  readRange?: string; // e.g., "3–7 min"
+}
+export interface Props {
+  title: string;
+  dek?: string;
+  stats?: Stats;
+  primaryCta?: Cta;
+  secondaryCta?: Cta;
+}
+
+const { title, dek, stats = {}, primaryCta, secondaryCta } = Astro.props as Props;
+
+function fmtDate(d?: string | Date) {
+  if (!d) return null;
+  try {
+    const date = typeof d === "string" ? new Date(d) : d;
+    return date.toLocaleDateString("en-KE", { year: "numeric", month: "short" });
+  } catch { return null; }
+}
+
+const lastUpdatedText = fmtDate(stats.lastUpdated);
+const statBits = [
+  typeof stats.postCount === "number" ? `${stats.postCount} posts` : null,
+  lastUpdatedText ? `Updated ${lastUpdatedText}` : null,
+  stats.readRange ? stats.readRange : null
+].filter(Boolean) as string[];
+
+const dekId = "category-hero-dek";
+---
+
+<section class="category-hero" data-section="category-hero">
+  <!-- Single, page-level container lives in the parent page (Fix Plan 107). -->
+  <div class="category-hero__card">
+    <header class="category-hero__head">
+      <p class="category-hero__eyebrow">Blog Category</p>
+      <h1 class="category-hero__title">{title}</h1>
+
+      {dek && <p id={dekId} class="category-hero__dek">{dek}</p>}
+
+      {statBits.length > 0 && (
+        <ul class="category-hero__stats" aria-label="Category metrics">
+          {statBits.map((s) => <li class="category-hero__stat">{s}</li>)}
+        </ul>
+      )}
+
+      {(primaryCta || secondaryCta) && (
+        <div class="category-hero__ctas">
+          {primaryCta && (
+            <a
+              class="btn btn-primary"
+              href={primaryCta.href}
+              data-cta="category-primary"
+              aria-describedby={dek ? dekId : undefined}
+            >
+              {primaryCta.label}
+            </a>
+          )}
+          {secondaryCta && (
+            <a
+              class="btn btn-accent"
+              href={secondaryCta.href}
+              data-cta="category-secondary"
+              aria-describedby={dek ? dekId : undefined}
+            >
+              {secondaryCta.label}
+            </a>
+          )}
+        </div>
+      )}
+    </header>
+  </div>
+</section>

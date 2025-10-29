@@ -1,0 +1,22 @@
+---
+type Variant = "header" | "footer";
+interface PostTagsProps {
+  tags?: string[];
+  variant?: Variant; // default: "header"
+}
+const { tags = [], variant = "header" } = Astro.props as PostTagsProps;
+
+// Colocated CSS
+const sheet = new URL("./PostTags.css", import.meta.url).toString();
+---
+{tags.length > 0 && (
+  <>
+    <link rel="stylesheet" href={sheet} />
+    <ul
+      class={`post__tags${variant === "footer" ? " post__tags--footer" : ""}`}
+      aria-label="Tags"
+    >
+      {tags.slice(0, 12).map((t) => <li class="post__tag" itemprop="keywords">{t}</li>)}
+    </ul>
+  </>
+)}

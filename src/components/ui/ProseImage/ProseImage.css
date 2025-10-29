@@ -1,0 +1,20 @@
+@import "../../../styles/tokens.css";
+@import "../../../styles/typography.css";
+
+/* Figure inside prose */
+.ui-prose-image {
+  margin: var(--space-5) 0;
+}
+.ui-prose-image > img {
+  display: block;
+  max-inline-size: 100%;
+  height: auto;
+  border-radius: var(--radius-lg, 12px);
+  box-shadow: var(--shadow-sm, 0 1px 2px rgba(0,0,0,.06));
+}
+.ui-prose-image__caption {
+  margin-top: var(--space-2);
+  color: var(--text-2, var(--color-text-2));
+  font: var(--font-caption, 400 0.875rem/1.4 var(--font-sans));
+  text-align: center;
+}

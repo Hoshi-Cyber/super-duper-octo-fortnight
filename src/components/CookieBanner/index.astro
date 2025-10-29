@@ -1,0 +1,94 @@
+---
+/** File: src/components/CookieBanner/index.astro */
+import "./CookieBanner.css";
+
+const storageKey = "consent.analytics.choice"; // 'granted' | 'denied'
+const cookieName = "consent_analytics";        // mirrors storage for SSR/infra
+---
+
+<div
+  id="cookie-banner"
+  class="cb"
+  role="dialog"
+  aria-modal="false"
+  aria-live="polite"
+  aria-label="Cookie consent"
+  hidden
+>
+  <div class="cb__inner container">
+    <div class="cb__content">
+      <h2 class="cb__title">We use cookies</h2>
+      <p class="cb__text">
+        We use analytics cookies to measure what works and improve the site. You can accept or keep analytics off.
+        Change this any time from <a class="cb__link" href="/privacy">Privacy</a>.
+      </p>
+    </div>
+
+    <div class="cb__actions">
+      <button class="btn btn-primary" id="cb-accept" data-cta="cookies-accept">Accept analytics</button>
+      <button class="btn" id="cb-decline" data-cta="cookies-decline">Decline</button>
+    </div>
+  </div>
+</div>
+
+<script is:inline>
+  (function () {
+    // Plain JS values. Avoid Astro mustache-in-mustache.
+    var KEY = "consent.analytics.choice";
+    var COOKIE = "consent_analytics";
+
+    var banner = document.getElementById('cookie-banner');
+    var accept = document.getElementById('cb-accept');
+    var decline = document.getElementById('cb-decline');
+
+    function getChoice() {
+      try { return localStorage.getItem(KEY); } catch (_) { return null; }
+    }
+    function setChoice(value) {
+      try { localStorage.setItem(KEY, value); } catch (_) {}
+      try {
+        document.cookie = COOKIE + "=" + encodeURIComponent(value)
+          + "; Max-Age=" + (3600*24*365)
+          + "; Path=/; SameSite=Lax";
+      } catch (_) {}
+    }
+    function updateConsent(granted) {
+      // Consent Mode v2
+      var payload = granted ? {
+        analytics_storage: 'granted',
+        ad_storage: 'granted',
+        ad_user_data: 'granted',
+        ad_personalization: 'granted'
+      } : {
+        analytics_storage: 'denied',
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied'
+      };
+      (window.gtag || function(){ (window.dataLayer = window.dataLayer || []).push(arguments); })('consent', 'update', payload);
+      (window.dataLayer = window.dataLayer || []).push({
+        event: 'consent_choice',
+        consent: granted ? 'granted' : 'denied'
+      });
+    }
+
+    function hide() { if (banner) banner.hidden = true; }
+    function show() { if (banner) banner.hidden = false; }
+
+    // Expose a reopen hook for footer “Manage cookies”
+    window.openCookieBanner = function() { show(); };
+
+    // Initial state: show only if no prior choice
+    var choice = getChoice();
+    if (!choice) { show(); }
+
+    // Wire buttons
+    if (accept) accept.addEventListener('click', function () {
+      setChoice('granted'); updateConsent(true); hide();
+    }, { passive: true });
+
+    if (decline) decline.addEventListener('click', function () {
+      setChoice('denied'); updateConsent(false); hide();
+    }, { passive: true });
+  })();
+</script>

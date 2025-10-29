@@ -1,0 +1,19 @@
+/* Keep component CSS minimal and scoped. Global tokens/typography come from styles/index.css */
+
+.post .post__header {
+  margin: 0 0 var(--space-6);
+}
+
+/* Eyebrow inherits type scale from global rules */
+.post .post__eyebrow {
+  display: inline-block;
+}
+
+/* Title spacing guard when used standalone */
+
+/* Dek: short summary under the title */
+.post .post__dek {
+  margin-top: var(--space-3);
+  max-width: 65ch;
+  line-height: 1.5;
+}

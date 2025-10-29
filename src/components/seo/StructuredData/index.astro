@@ -1,0 +1,11 @@
+---
+export interface Props {
+  type: 'Organization' | 'WebSite' | 'BreadcrumbList' | 'Product'
+  data: any
+}
+const { data } = Astro.props
+// No CSS. Emits JSON-LD only.
+---
+<script type="application/ld+json">
+  {JSON.stringify(data)}
+</script>

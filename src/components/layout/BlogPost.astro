@@ -1,0 +1,173 @@
+---
+// src/components/layout/BlogPost.astro
+import BaseLayout from "./BaseLayout.astro";
+
+// Blog components
+import PostHeader from "../blog/PostHeader/index.astro";
+import PostMeta from "../blog/PostMeta/index.astro";
+import PostTags from "../blog/PostTags/index.astro";
+import PostCover from "../blog/PostCover/index.astro";
+import PostCTAs from "../blog/PostCTAs/index.astro";
+
+// UI
+import Badge from "../ui/Badge/index.astro";
+
+export interface Cover {
+  src: string;
+  alt?: string;
+  width?: number;
+  height?: number;
+}
+export interface SEO {
+  canonical?: string;
+  title?: string;
+  description?: string;
+  [key: string]: any;
+}
+export interface CTA {
+  label: string;
+  url: string;
+}
+export interface Props {
+  title: string;
+  description?: string;
+  seo?: SEO;
+  canonical?: string;      // may arrive from MD frontmatter
+  ogImage?: string;
+  date?: string | Date;
+  updated?: string | Date;
+  author?: string;
+  readingTime?: number;
+  readingTimeMinutes?: number; // alias
+  tags?: string[];
+  cover?: Cover | null;
+  ctaPrimary?: CTA;
+  ctaSecondary?: CTA;
+}
+
+const props = Astro.props as Props;
+
+const {
+  title,
+  description = "",
+  author,
+  tags = [],
+  ctaPrimary,
+  ctaSecondary,
+} = props;
+
+// reading time normalization
+const readingTime =
+  typeof props.readingTime === "number"
+    ? props.readingTime
+    : typeof props.readingTimeMinutes === "number"
+    ? props.readingTimeMinutes
+    : undefined;
+
+// dates
+const publishedDate = props.date ? new Date(props.date) : null;
+const updatedDate = props.updated ? new Date(props.updated) : publishedDate;
+
+const isoPublished = publishedDate ? publishedDate.toISOString() : null;
+const isoModified = updatedDate ? updatedDate.toISOString() : null;
+
+const displayDate = publishedDate
+  ? new Intl.DateTimeFormat("en-GB", { year: "numeric", month: "long", day: "numeric" }).format(
+      publishedDate
+    )
+  : null;
+
+const tagList = (tags || []).slice(0, 12);
+
+// canonical
+const siteUrl = Astro.site?.toString().replace(/\/$/, "") || "";
+const fmCanonical = props.canonical;
+const seoIn = props.seo ?? {};
+const canonicalSrc = seoIn.canonical ?? fmCanonical ?? Astro.url.pathname;
+const canonical =
+  canonicalSrc && canonicalSrc.startsWith("http") ? canonicalSrc : `${siteUrl}${canonicalSrc ?? ""}`;
+
+// cover inference
+let cover: Cover | null = props.cover ?? null;
+if (!cover && typeof props.ogImage === "string" && props.ogImage.trim()) {
+  cover = { src: props.ogImage.trim(), alt: title };
+}
+
+// json-ld
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  headline: title,
+  datePublished: isoPublished || undefined,
+  dateModified: isoModified || undefined,
+  author: author ? { "@type": "Person", name: author } : undefined,
+  image: cover?.src ? `${siteUrl}${cover.src}` : undefined,
+  mainEntityOfPage: canonical,
+  description: description || seoIn?.description,
+};
+
+// styles
+const sheet = new URL("./BlogPost.css", import.meta.url).toString();
+
+// helpers
+const showUpdatedBadge =
+  publishedDate && updatedDate && updatedDate.getTime() > publishedDate.getTime();
+---
+<link rel="stylesheet" href={sheet} />
+
+<BaseLayout title={title} description={description} seo={{ ...seoIn, canonical }}>
+  <article class="post container" itemscope itemtype="https://schema.org/Article">
+    
+      <PostHeader title={title} eyebrow="Blog" />
+      {showUpdatedBadge && (
+        <p class="post__updated">
+          <Badge title="Content updated">Updated {new Intl.DateTimeFormat("en-GB", {
+            year: "numeric", month: "long", day: "numeric"
+          }).format(updatedDate!)}
+          </Badge>
+        </p>
+      )}
+
+      <PostMeta
+        date={publishedDate ?? undefined}
+        updated={updatedDate ?? undefined}
+        author={author}
+        readingTime={typeof readingTime === "number" && readingTime > 0 ? readingTime : undefined}
+      />
+
+      {tagList.length > 0 && <PostTags tags={tagList} variant="header" />}
+    
+
+    {cover?.src && (
+      <PostCover
+        src={cover.src}
+        alt={cover.alt ?? ""}
+        width={cover.width ?? 1280}
+        height={cover.height ?? 720}
+      />
+    )}
+
+    {(ctaPrimary || ctaSecondary) && (
+      <PostCTAs
+        primary={ctaPrimary ? { label: ctaPrimary.label, url: ctaPrimary.url } : undefined}
+        secondary={ctaSecondary ? { label: ctaSecondary.label, url: ctaSecondary.url } : undefined}
+      />
+    )}
+
+    <section class="post__content prose" itemprop="articleBody">
+      <slot />
+    </section>
+
+    {tagList.length > 0 && (
+      <footer class="post__footer">
+        <PostTags tags={tagList} variant="footer" />
+      </footer>
+    )}
+
+    <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
+  </article>
+</BaseLayout>
+
+<style is:global>
+  @import "../../styles/prose.css";
+</style>

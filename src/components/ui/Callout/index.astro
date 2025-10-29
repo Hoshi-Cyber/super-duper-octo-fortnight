@@ -1,0 +1,14 @@
+---
+type Tone = 'info' | 'success' | 'warning';
+interface Props { tone?: Tone; title?: string }
+const { tone = 'info', title } = Astro.props;
+const sheet = new URL('./Callout.css', import.meta.url).toString();
+const toneClass = `ui-callout ui-callout--${tone}`;
+---
+<link rel="stylesheet" href={sheet} />
+<section class={toneClass} role="note" aria-label={title ?? tone}>
+  {title && <h3 class="ui-callout__title">{title}</h3>}
+  <div class="ui-callout__body">
+    <slot />
+  </div>
+</section>

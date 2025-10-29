@@ -1,0 +1,101 @@
+---
+// File: src/components/blog/PostCard/index.astro
+import "./PostCard.css";
+
+/** Safe props (normalized by parents; URLs come pre-built) */
+const props = (Astro.props ?? {}) as Record<string, unknown>;
+
+const slug    = typeof props.slug === "string" ? props.slug : "";
+const url     = typeof props.url === "string" && props.url ? props.url : "#";
+const title   = typeof props.title === "string" ? props.title : "Untitled";
+const excerpt = typeof props.excerpt === "string" ? props.excerpt : "";
+const dateISO = typeof props.dateISO === "string" ? props.dateISO : "";
+const readMin =
+  typeof props.readMin === "number" || typeof props.readMin === "string"
+    ? String(props.readMin)
+    : "";
+const stage   = typeof props.stage === "string" ? props.stage : "";
+const category = typeof props.category === "string" ? props.category : "";
+const categoryHref =
+  typeof props.categoryHref === "string" && props.categoryHref ? props.categoryHref : "";
+
+/** Normalize cover input (prefer cover; fallback to thumbnail*) */
+const thumbnailSrc =
+  typeof props.thumbnailSrc === "string" && props.thumbnailSrc
+    ? (props.thumbnailSrc as string)
+    : undefined;
+const thumbnailAlt =
+  typeof props.thumbnailAlt === "string" && props.thumbnailAlt
+    ? (props.thumbnailAlt as string)
+    : undefined;
+
+const explicitCover = (props.cover ?? null) as null | {
+  src?: string;
+  alt?: string;
+  width?: number;
+  height?: number;
+};
+const cover =
+  explicitCover && typeof explicitCover.src === "string"
+    ? { src: explicitCover.src, alt: explicitCover.alt ?? title }
+    : {
+        src: thumbnailSrc ?? "/assets/logos/logo-wide-1200.png",
+        alt: thumbnailAlt ?? "Post thumbnail",
+      };
+
+/** Canonical href: use provided url only (no local slug building) */
+const canonicalHref = url;
+
+/** Date label */
+let dateLabel = "";
+if (dateISO) {
+  const d = new Date(dateISO);
+  if (!Number.isNaN(d.getTime())) {
+    dateLabel = d.toLocaleDateString("en-KE", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  }
+}
+
+const titleId =
+  "pcard-title-" + (slug || Math.random().toString(36).slice(2, 8));
+---
+
+<article class="pcard" data-section="card">
+  <a class="pcard__link" href={canonicalHref} aria-labelledby={titleId} data-event="card_click">
+    <figure class="pcard__media" aria-hidden="true">
+      {stage && <span class="pcard__badge">{stage}</span>}
+      <img
+        src={cover.src}
+        alt={cover.alt}
+        width="640"
+        height="360"
+        loading="lazy"
+        decoding="async"
+        sizes="(min-width:1280px) 25vw, (min-width:1024px) 33vw, (min-width:640px) 50vw, 100vw"
+        fetchpriority="low"
+      />
+    </figure>
+
+    <div class="pcard__content">
+      {category && (
+        <div class="pcard__kicker">
+          {categoryHref
+            ? <a class="pcard__category" href={categoryHref}>{category}</a>
+            : <span class="pcard__category" aria-current="true">{category}</span>}
+        </div>
+      )}
+
+      <h3 id={titleId} class="pcard__title line-clamp-2">{title}</h3>
+
+      {excerpt && <p class="pcard__excerpt line-clamp-3">{excerpt}</p>}
+
+      <p class="pcard__meta">
+        {dateLabel && <time datetime={dateISO}>{dateLabel}</time>}
+        {readMin && <span aria-hidden="true">{readMin} min read</span>}
+      </p>
+    </div>
+  </a>
+</article>

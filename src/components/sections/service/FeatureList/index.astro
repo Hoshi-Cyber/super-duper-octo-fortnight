@@ -1,0 +1,38 @@
+---
+export interface Item { title: string; body: string; icon?: string }
+export interface Props {
+  items: Item[]
+  class?: string               // optional section class for themed backgrounds, etc.
+}
+const { items = [], class: className = "" } = Astro.props
+import "./FeatureList.css"
+---
+<section
+  class={`section ${className}`.trim()}
+  data-section="service-features"
+  aria-labelledby="features-title"
+>
+  <div class="container">
+    <h2 id="features-title" class="h2">What you get</h2>
+
+    <div class="features__grid">
+      {items.map((it) => (
+        <article class="card features__item">
+          {it.icon && (
+            <img
+              class="features__icon"
+              src={it.icon}
+              alt=""
+              width="48"
+              height="48"
+              loading="lazy"
+              decoding="async"
+            />
+          )}
+          <h3 class="h3">{it.title}</h3>
+          <p>{it.body}</p>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>

@@ -1,0 +1,81 @@
+---
+// src/components/blog/EditorsPicks/index.astro
+/**
+ * EditorsPicks — curated 3-post strip.
+ * Props:
+ *  - posts: Array<{ url: string; frontmatter: {
+ *      title: string; description?: string; date: string|Date;
+ *      readingTime?: number; category?: string;
+ *      cover?: { src: string; alt?: string; width?: number; height?: number }
+ *    }}>
+ *  - eyebrow?: string
+ *  - title?: string
+ */
+export interface Cover { src: string; alt?: string; width?: number; height?: number }
+export interface FM {
+  title: string; description?: string; date: string|Date;
+  readingTime?: number; category?: string; cover?: Cover;
+}
+export interface Post { url: string; frontmatter: FM }
+export interface Props { posts: Post[]; eyebrow?: string; title?: string }
+
+const {
+  posts = [],
+  eyebrow = "Curated",
+  title = "Editors’ picks",
+} = Astro.props as Props;
+
+const fmt = (d: string|Date) =>
+  new Date(d).toLocaleDateString('en-KE', { year: 'numeric', month: 'short', day: 'numeric' });
+
+// Fix Plan 95: import CSS via ?url
+import css from "./EditorsPicks.css?url";
+---
+<style is:global>
+  @import "../../../styles/tokens.css";
+  @import "../../../styles/typography.css";
+  @import "../../../styles/utilities.css";
+  @import "../../../styles/breakpoints.css";
+</style>
+<link rel="stylesheet" href={css} />
+
+{posts.length > 0 && (
+  <section class="ep" aria-label="Editors’ picks">
+    <div class="container">
+      <header class="ep__head">
+        {eyebrow && <p class="ep__eyebrow">{eyebrow}</p>}
+        {title && <h2 class="ep__title">{title}</h2>}
+      </header>
+
+      <div class="ep__grid">
+        {posts.slice(0, 3).map((p, i) => (
+          <article class="ep__card">
+            {p.frontmatter?.cover?.src && (
+              <a href={p.url} class="ep__media" aria-label={`Read ${p.frontmatter.title}`}>
+                <img
+                  src={p.frontmatter.cover.src}
+                  alt={p.frontmatter.cover.alt ?? p.frontmatter.title}
+                  width={p.frontmatter.cover.width ?? 640}
+                  height={p.frontmatter.cover.height ?? 360}
+                  loading={i < 1 ? "eager" : "lazy"}
+                  decoding="async"
+                />
+              </a>
+            )}
+            <div class="ep__body">
+              {p.frontmatter?.category && <p class="ep__cat">{p.frontmatter.category}</p>}
+              <h3 class="ep__cardTitle"><a href={p.url}>{p.frontmatter.title}</a></h3>
+              {p.frontmatter?.description && <p class="ep__excerpt clamp-3">{p.frontmatter.description}</p>}
+              <p class="ep__meta">
+                <time datetime={new Date(p.frontmatter.date).toISOString()}>
+                  {fmt(p.frontmatter.date)}
+                </time>
+                {typeof p.frontmatter?.readingTime === 'number' && <> · {p.frontmatter.readingTime} min read</>}
+              </p>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+)}
