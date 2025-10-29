@@ -19,6 +19,7 @@
     "@astrojs/check": "^0.9.5",
     "@astrojs/compiler": "^2.13.0",
     "@astrojs/mdx": "^4.3.7",
+    "@astrojs/netlify": "^6.6.0",
     "@astrojs/node": "^9",
     "@astrojs/rss": "^4.0.12",
     "@astrojs/tailwind": "^6.0.2",

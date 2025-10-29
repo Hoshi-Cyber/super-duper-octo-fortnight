@@ -2,14 +2,14 @@
 import { defineConfig } from "astro/config";
 import tailwind from "@astrojs/tailwind";
 import mdx from "@astrojs/mdx";
-import node from "@astrojs/node";
+import netlify from "@astrojs/netlify";
 import { fileURLToPath } from "url";
 
 export default defineConfig({
   site: process.env.ASTRO_SITE || undefined,
   trailingSlash: "always",
   output: "server",
-  adapter: node({ mode: "standalone" }),
+  adapter: netlify(),
   integrations: [tailwind(), mdx()],
   vite: {
     resolve: {
