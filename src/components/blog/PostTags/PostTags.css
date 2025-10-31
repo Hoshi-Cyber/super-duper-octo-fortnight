@@ -1,36 +1,84 @@
+@import "../../../styles/index.css";
 @import "../../../styles/tokens.css";
 @import "../../../styles/typography.css";
 @import "../../../styles/utilities.css";
 
-/* Scope strictly to the post context */
-.post .post__tags {
+/* Tag list: horizontal row with wrap */
+.post__tags {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: var(--space-2);
   margin: 0 0 var(--space-6);
   padding: 0;
   list-style: none;
 }
 
-.post .post__tags--footer {
+.post__tags--footer {
   margin-top: var(--space-8);
 }
 
-.post .post__tag {
+/* Ensure items lay out inline and never show bullets */
+.post__tags > li {
+  display: inline-flex;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Tag pill */
+.post__tag {
   display: inline-flex;
   align-items: center;
-  gap: .375rem;
-  padding: .25rem .6rem;
+  gap: 0.375rem;
+  padding: 0.375rem 0.65rem;        /* touch target */
+  min-height: 2rem;                  /* ~32px target */
   border-radius: var(--radius-full);
   background: var(--color-light);
   color: var(--color-text);
-  box-shadow: inset 0 0 0 1px rgba(17, 24, 39, .08);
+  box-shadow: inset 0 0 0 1px rgba(17, 24, 39, 0.08);
   font-size: var(--fs-sm);
   line-height: 1;
   text-decoration: none;
+  transition: box-shadow 120ms ease, background-color 120ms ease, color 120ms ease, transform 80ms ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.post .post__tag:focus-visible {
+/* Hover/active/focus */
+.post__tag:hover {
+  background: var(--color-surface);
+  box-shadow: inset 0 0 0 1px rgba(17, 24, 39, 0.18);
+  text-decoration: none;
+}
+.post__tag:active { transform: translateY(0.5px); }
+.post__tag:visited { color: var(--color-text); }
+.post__tag:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
+  box-shadow: inset 0 0 0 1px var(--color-primary-600);
+}
+
+/* Responsive spacing bump */
+@media (min-width: 1024px) {
+  .post__tags { gap: var(--space-3); }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .post__tag { transition: none; }
+  .post__tag:active { transform: none; }
+}
+
+/* Forced colors (Windows HC) */
+@media (forced-colors: active) {
+  .post__tag {
+    border: 1px solid CanvasText;
+    background: Canvas;
+    color: CanvasText;
+    box-shadow: none;
+  }
+  .post__tag:focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
 }

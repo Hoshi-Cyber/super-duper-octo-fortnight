@@ -43,6 +43,10 @@ export interface Props {
   cover?: Cover | null;
   ctaPrimary?: CTA;
   ctaSecondary?: CTA;
+
+  // optional breadcrumb inputs
+  category?: string;
+  categoryUrl?: string;
 }
 
 const props = Astro.props as Props;
@@ -54,6 +58,8 @@ const {
   tags = [],
   ctaPrimary,
   ctaSecondary,
+  category,
+  categoryUrl,
 } = props;
 
 // reading time normalization
@@ -93,7 +99,7 @@ if (!cover && typeof props.ogImage === "string" && props.ogImage.trim()) {
   cover = { src: props.ogImage.trim(), alt: title };
 }
 
-// json-ld
+// json-ld (Article)
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "Article",
@@ -106,38 +112,68 @@ const jsonLd = {
   description: description || seoIn?.description,
 };
 
-// styles
-const sheet = new URL("./BlogPost.css", import.meta.url).toString();
-
 // helpers
 const showUpdatedBadge =
   publishedDate && updatedDate && updatedDate.getTime() > publishedDate.getTime();
+
+// breadcrumb data (UI + JSON-LD)
+const crumbs = [
+  { label: "Blog", href: "/blog" },
+  ...(category
+    ? [{ label: category, href: categoryUrl && categoryUrl.startsWith("/") ? categoryUrl : `/blog/category/${encodeURIComponent(category!.toLowerCase())}` }]
+    : []),
+  { label: title, href: canonical }
+];
+
+const breadcrumbJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: crumbs.map((c, i) => ({
+    "@type": "ListItem",
+    position: i + 1,
+    name: c.label,
+    item: c.href.startsWith("http") ? c.href : `${siteUrl}${c.href}`
+  }))
+};
+
+// styles
+const sheet = new URL("./BlogPost.css", import.meta.url).toString();
 ---
 <link rel="stylesheet" href={sheet} />
 
 <BaseLayout title={title} description={description} seo={{ ...seoIn, canonical }}>
   <article class="post container" itemscope itemtype="https://schema.org/Article">
-    
-      <PostHeader title={title} eyebrow="Blog" />
-      {showUpdatedBadge && (
-        <p class="post__updated">
-          <Badge title="Content updated">Updated {new Intl.DateTimeFormat("en-GB", {
-            year: "numeric", month: "long", day: "numeric"
-          }).format(updatedDate!)}
-          </Badge>
-        </p>
-      )}
+    {/* Breadcrumbs */}
+    <nav class="post__breadcrumbs" aria-label="Breadcrumb">
+      <ol>
+        {crumbs.slice(0, -1).map((c) => (
+          <li><a href={c.href}>{c.label}</a></li>
+        ))}
+        <li aria-current="page">{crumbs[crumbs.length - 1].label}</li>
+      </ol>
+    </nav>
 
-      <PostMeta
-        date={publishedDate ?? undefined}
-        updated={updatedDate ?? undefined}
-        author={author}
-        readingTime={typeof readingTime === "number" && readingTime > 0 ? readingTime : undefined}
-      />
+    {/* Header stack */}
+    <PostHeader title={title} eyebrow="Blog" />
 
-      {tagList.length > 0 && <PostTags tags={tagList} variant="header" />}
-    
+    {showUpdatedBadge && (
+      <p class="post__updated">
+        <Badge title="Content updated">
+          Updated {new Intl.DateTimeFormat("en-GB", { year: "numeric", month: "long", day: "numeric" }).format(updatedDate!)}
+        </Badge>
+      </p>
+    )}
 
+    <PostMeta
+      date={publishedDate ?? undefined}
+      updated={updatedDate ?? undefined}
+      author={author}
+      readingTime={typeof readingTime === "number" && readingTime > 0 ? readingTime : undefined}
+    />
+
+    {tagList.length > 0 && <PostTags tags={tagList} variant="header" />}
+
+    {/* Cover image */}
     {cover?.src && (
       <PostCover
         src={cover.src}
@@ -147,6 +183,7 @@ const showUpdatedBadge =
       />
     )}
 
+    {/* Inline CTAs early */}
     {(ctaPrimary || ctaSecondary) && (
       <PostCTAs
         primary={ctaPrimary ? { label: ctaPrimary.label, url: ctaPrimary.url } : undefined}
@@ -154,17 +191,21 @@ const showUpdatedBadge =
       />
     )}
 
+    {/* Article body */}
     <section class="post__content prose" itemprop="articleBody">
       <slot />
     </section>
 
+    {/* Footer tags */}
     {tagList.length > 0 && (
       <footer class="post__footer">
         <PostTags tags={tagList} variant="footer" />
       </footer>
     )}
 
+    {/* Structured data */}
     <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
+    <script type="application/ld+json">{JSON.stringify(breadcrumbJsonLd)}</script>
   </article>
 </BaseLayout>
 

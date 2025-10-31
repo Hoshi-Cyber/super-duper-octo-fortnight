@@ -7,10 +7,11 @@ updated: 2025-10-24
 author: Sev
 category: kenya-market
 tags:
-  - Kenya job market 2025
-  - salary bands Kenya
-  - high demand jobs
-  - sectors 2025
+   - Kenya job market 2025
+   - Salary bands Kenya
+   - High demand jobs
+   - Sectors 2025
+  
 slug: high-demand-roles-in-kenya-2025-by-sector
 draft: false
 canonical: /blog/kenya-market/high-demand-roles-in-kenya-2025-by-sector/
